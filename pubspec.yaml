@@ -1,0 +1,52 @@
+name: education_game_app
+description: Aplikasi game edukasi berbasis Flutter
+
+# Versi app dan dependensi Flutter/Dart
+version: 1.0.0+1
+environment:
+  sdk: ">=2.17.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.5
+  http: ^0.13.5 # Untuk API requests
+  provider: ^6.0.5 # Untuk state management (opsional)
+  shared_preferences: ^2.1.0 # Untuk menyimpan data lokal
+  cached_network_image: ^3.2.3 # Untuk caching gambar
+  flutter_svg: ^2.0.5 # Untuk loading SVG (opsional)
+  intl: ^0.18.0 # Untuk format tanggal dan angka
+  flutter_pdfview: ^1.2.5
+  video_player: ^2.4.7
+  chewie: ^1.3.5
+  path_provider: ^2.1.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.1
+
+# Konfigurasi Flutter
+flutter:
+  uses-material-design: true
+
+  # Daftar asset (gambar, font, dll)
+  assets:
+    - assets/images/
+    - assets/icons/
+
+  # Konfigurasi font (opsional)
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+        - asset: assets/fonts/Poppins-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Poppins-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Poppins-SemiBold.ttf
+          weight: 600
+# CATATAN:
+# 1. Pastikan untuk membuat folder assets/images, assets/icons, dan assets/fonts
+# 2. Tambahkan file gambar dan font yang diperlukan ke folder tersebut
+# 3. Jika Anda tidak memiliki font Poppins, Anda bisa menghapus bagian fonts atau menggantinya dengan font lain

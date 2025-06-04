@@ -11,45 +11,7 @@ class ChapterProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
-  // Untuk implementasi dummy
-  Future<void> loadDummyChapters() async {
-    _setLoading(true);
-
-    try {
-      // Simulasi delay jaringan
-      await Future.delayed(const Duration(seconds: 1));
-
-      _chapters = [
-        Chapter(
-          id: 1,
-          title: 'BAB VI, Cinta Indonesia',
-          description: '',
-          isLocked: false,
-          order: 1,
-        ),
-        Chapter(
-          id: 2,
-          title: 'BAB VII, Sayangi Bumi',
-          description: '',
-          isLocked: false,
-          order: 2,
-        ),
-        Chapter(
-          id: 3,
-          title: 'BAB VIII, Bergerak Bersama',
-          description: '',
-          isLocked: true,
-          order: 3,
-        )
-      ];
-
-      _setLoading(false);
-    } catch (e) {
-      _setError(e.toString());
-    }
-  }
-
-  // Untuk implementasi API sebenarnya
+  // Menggunakan API endpoint /list-babs
   Future<void> getChapters() async {
     _setLoading(true);
 
@@ -81,12 +43,32 @@ class ChapterProvider extends ChangeNotifier {
       final nextChapter = _chapters[currentIndex + 1];
       _chapters[currentIndex + 1] = Chapter(
         id: nextChapter.id,
-        title: nextChapter.title,
+        name: nextChapter.name,
         description: nextChapter.description,
-        isLocked: false,
-        order: nextChapter.order,
+        isDone: nextChapter.isDone,
+        isUnlocked: true, // Unlock chapter berikutnya
       );
 
+      notifyListeners();
+    }
+  }
+
+  // Menandai chapter sebagai selesai
+  void markChapterComplete(int chapterId) {
+    final index = _chapters.indexWhere((chapter) => chapter.id == chapterId);
+
+    if (index != -1) {
+      final chapter = _chapters[index];
+      _chapters[index] = Chapter(
+        id: chapter.id,
+        name: chapter.name,
+        description: chapter.description,
+        isDone: true,
+        isUnlocked: chapter.isUnlocked,
+      );
+
+      // Unlock chapter berikutnya
+      unlockNextChapter(chapterId);
       notifyListeners();
     }
   }

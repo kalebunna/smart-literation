@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:education_game_app/models/chapter_model.dart';
 import 'package:education_game_app/models/material_model.dart';
 import 'package:education_game_app/models/question_model.dart';
@@ -11,11 +12,17 @@ class ApiService {
       'http://127.0.0.1:8000/api'; // Ganti dengan URL API sebenarnya
 
   // Headers umum untuk request
-  Map<String, String> _getHeaders({String? token}) {
+  Future<Map<String, String>> _getHeaders({String? token}) async {
     final headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     };
+
+    // Jika token tidak diberikan, ambil dari SharedPreferences
+    if (token == null) {
+      final prefs = await SharedPreferences.getInstance();
+      token = prefs.getString('token');
+    }
 
     if (token != null) {
       headers['Authorization'] = 'Bearer $token';
@@ -30,7 +37,7 @@ class ApiService {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/login'),
-        headers: _getHeaders(),
+        headers: await _getHeaders(),
         body: jsonEncode({
           'email': email,
           'password': password,
@@ -43,16 +50,23 @@ class ApiService {
     }
   }
 
-  // Endpoint: GET /chapters
+  // Endpoint: GET /list-babs (Updated untuk menggunakan endpoint yang benar)
   Future<List<Chapter>> getChapters() async {
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/chapters'),
-        headers: _getHeaders(),
+        Uri.parse('$baseUrl/list-babs'),
+        headers: await _getHeaders(),
       );
 
-      final apiResponse = _handleResponse<List<dynamic>>(response);
-      return apiResponse.data!.map((json) => Chapter.fromJson(json)).toList();
+      final apiResponse = _handleResponse<Map<String, dynamic>>(response);
+
+      if (apiResponse.success && apiResponse.data != null) {
+        final data = apiResponse.data!;
+        final List<dynamic> chaptersData = data['data'] ?? [];
+        return chaptersData.map((json) => Chapter.fromJson(json)).toList();
+      } else {
+        throw Exception(apiResponse.error ?? 'Failed to load chapters');
+      }
     } catch (e) {
       throw Exception('Failed to load chapters: $e');
     }
@@ -63,7 +77,7 @@ class ApiService {
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/chapters/$chapterId/materials'),
-        headers: _getHeaders(),
+        headers: await _getHeaders(),
       );
 
       final apiResponse = _handleResponse<List<dynamic>>(response);
@@ -78,7 +92,7 @@ class ApiService {
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/materials/$materialId/questions'),
-        headers: _getHeaders(),
+        headers: await _getHeaders(),
       );
 
       final apiResponse = _handleResponse<List<dynamic>>(response);
@@ -96,7 +110,7 @@ class ApiService {
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/materials/$materialId/final-questions'),
-        headers: _getHeaders(),
+        headers: await _getHeaders(),
       );
 
       final apiResponse = _handleResponse<List<dynamic>>(response);
@@ -113,7 +127,7 @@ class ApiService {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/materials/$materialId/submit-question'),
-        headers: _getHeaders(),
+        headers: await _getHeaders(),
         body: jsonEncode({
           'question': question,
         }),
@@ -133,7 +147,7 @@ class ApiService {
       final response = await http.post(
         Uri.parse(
             '$baseUrl/materials/$materialId/questions/$questionId/submit'),
-        headers: _getHeaders(),
+        headers: await _getHeaders(),
         body: jsonEncode({
           'selected_option_index': selectedOptionIndex,
         }),
@@ -150,7 +164,7 @@ class ApiService {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/materials/$materialId/complete'),
-        headers: _getHeaders(),
+        headers: await _getHeaders(),
         body: jsonEncode({
           'score': score,
         }),
@@ -167,13 +181,13 @@ class ApiService {
     try {
       final dynamic responseData = json.decode(response.body);
 
-      // Cek apakah backend mengembalikan field 'success'
+      // Cek apakah backend mengembalikan field 'status'
       if (responseData is Map<String, dynamic> &&
-          responseData.containsKey('success')) {
-        if (responseData['success'] == true) {
+          responseData.containsKey('status')) {
+        if (responseData['status'] == true) {
           return ApiResponse<T>.success(responseData as T);
         } else {
-          // Backend mengembalikan success: false
+          // Backend mengembalikan status: false
           String errorMessage = responseData['message'] ??
               responseData['error'] ??
               'Unknown error occurred';
@@ -181,7 +195,7 @@ class ApiService {
         }
       }
 
-      // Fallback untuk response tanpa field 'success'
+      // Fallback untuk response tanpa field 'status'
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return ApiResponse<T>.success(responseData as T);
       } else {

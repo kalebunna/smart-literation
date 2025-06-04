@@ -1,35 +1,40 @@
 class Chapter {
   final int id;
-  final String title;
+  final String name;
   final String description;
-  final bool isLocked;
-  final int order;
+  final bool isDone;
+  final bool isUnlocked;
 
   Chapter({
     required this.id,
-    required this.title,
+    required this.name,
     required this.description,
-    required this.isLocked,
-    required this.order,
+    required this.isDone,
+    required this.isUnlocked,
   });
+
+  // Getter untuk compatibility dengan kode yang sudah ada
+  String get title => name;
+  bool get isLocked => !isUnlocked;
+  int get order => id; // Menggunakan id sebagai order
 
   factory Chapter.fromJson(Map<String, dynamic> json) {
     return Chapter(
       id: json['id'],
-      title: json['title'],
+      name: json['name'],
       description: json['description'],
-      isLocked: json['is_locked'] ?? true,
-      order: json['order'] ?? 0,
+      isDone: json['is_done'] ?? false,
+      isUnlocked: json['is_unlocked'] ?? false,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'title': title,
+      'name': name,
       'description': description,
-      'is_locked': isLocked,
-      'order': order,
+      'is_done': isDone,
+      'is_unlocked': isUnlocked,
     };
   }
 }

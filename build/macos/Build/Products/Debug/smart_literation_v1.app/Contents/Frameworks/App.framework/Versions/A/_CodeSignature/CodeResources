@@ -10,23 +10,39 @@
 		</data>
 		<key>Resources/flutter_assets/AssetManifest.bin</key>
 		<data>
-		ME0cAg6cl/bTZmwXEVgMugDccUI=
+		3hOj4plyYP+Q3PGsrkB+LiaZrfs=
 		</data>
 		<key>Resources/flutter_assets/AssetManifest.json</key>
 		<data>
-		oG5/OGn+vw7vp/nu5DUDoZJ4nFc=
+		o/P792yxq7by7cOLH9iM6eTiStk=
 		</data>
 		<key>Resources/flutter_assets/FontManifest.json</key>
 		<data>
-		vKJkVIcw+LGHFnKJGwrQwCREv68=
+		Bqyr7d52VMz4129ac/HR65aZiZE=
 		</data>
 		<key>Resources/flutter_assets/NOTICES.Z</key>
 		<data>
-		dUcNcOoc9gCJVWGZxCTFvcs4nXI=
+		1+4uK+0iu/A84HuP7UrHOvxuMwM=
 		</data>
 		<key>Resources/flutter_assets/NativeAssetsManifest.json</key>
 		<data>
 		re4p7E8rPLLsN+wzaPN/+AVpXTY=
+		</data>
+		<key>Resources/flutter_assets/assets/fonts/Poppins-Bold.ttf</key>
+		<data>
+		h1zwzs1ke88i551jPYaMGx7Jjfo=
+		</data>
+		<key>Resources/flutter_assets/assets/fonts/Poppins-Medium.ttf</key>
+		<data>
+		KD8htE772/J2uoAr4tlJo2u8QjM=
+		</data>
+		<key>Resources/flutter_assets/assets/fonts/Poppins-Regular.ttf</key>
+		<data>
+		/dMALn2BTuR8HBuEh8csa7s6LQA=
+		</data>
+		<key>Resources/flutter_assets/assets/fonts/Poppins-SemiBold.ttf</key>
+		<data>
+		ikrOk5LQa8t/jqL1FpsH5MODqQ0=
 		</data>
 		<key>Resources/flutter_assets/fonts/MaterialIcons-Regular.otf</key>
 		<data>
@@ -38,11 +54,15 @@
 		</data>
 		<key>Resources/flutter_assets/kernel_blob.bin</key>
 		<data>
-		pgyIqMApsg2gpssEaA2cSy/x9uA=
+		HfhIZjQsT0IrXtVYDCv99Qqq1vg=
 		</data>
 		<key>Resources/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf</key>
 		<data>
 		Bvk+P1ykE1PGRdktwgwDyz6AOqM=
+		</data>
+		<key>Resources/flutter_assets/packages/wakelock_plus/assets/no_sleep.js</key>
+		<data>
+		4X7PZ95hkgUE15GU2+5c1VKgHP0=
 		</data>
 		<key>Resources/flutter_assets/shaders/ink_sparkle.frag</key>
 		<data>
@@ -66,28 +86,28 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			AK9VrT1vIYmP534P8JLRoc2lLJQbaGDpko1FyK+MCV0=
+			DULSXYkRFgcK9/9C0Oj1hbeGIqlgC0HQV7w8ZUWNffg=
 			</data>
 		</dict>
 		<key>Resources/flutter_assets/AssetManifest.json</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			Sps95+7JukayebvM0TLjL1LW1VXXndpKp/O8tOm9ZR8=
+			tJEz1E9v2GT8C3cna9Hyh4jrNHKC9ysUecYRM8p8WA4=
 			</data>
 		</dict>
 		<key>Resources/flutter_assets/FontManifest.json</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			zX4DZFvESy3Ue3y2JvUcTsv1Whl6t3JBYotHrBZfviE=
+			tYv2hT7avEwzpqiEGEF8arsCd802MhZz9UjTZNR7H+M=
 			</data>
 		</dict>
 		<key>Resources/flutter_assets/NOTICES.Z</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			32DBDB236mXeOsTZpMz03hA2dhkO90BlcDio6TONeL8=
+			pqAOAvM5JbAw1whIfKgmr/csmlbfNnLRb1jdyPi1jlU=
 			</data>
 		</dict>
 		<key>Resources/flutter_assets/NativeAssetsManifest.json</key>
@@ -95,6 +115,34 @@
 			<key>hash2</key>
 			<data>
 			lUijHkoEgTXB2U+Rkyi/tirix7s8q5ZVfHlB2ql3dss=
+			</data>
+		</dict>
+		<key>Resources/flutter_assets/assets/fonts/Poppins-Bold.ttf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			chlUfuJTNMusD+SzrPC/Yx5I67YixxrwOO2qplLGCHU=
+			</data>
+		</dict>
+		<key>Resources/flutter_assets/assets/fonts/Poppins-Medium.ttf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			jZCYg96BNE4PvP7zDpMYcuktmu7N+Fttz24LKMB46Y4=
+			</data>
+		</dict>
+		<key>Resources/flutter_assets/assets/fonts/Poppins-Regular.ttf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			cH/cXIurV6kAYcao7Xtw1f+4L8gQ6ZTnn5C6zokMJVo=
+			</data>
+		</dict>
+		<key>Resources/flutter_assets/assets/fonts/Poppins-SemiBold.ttf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			JIwCRLNQ7GiICZaqa+bXeWJ0tJmS1fy77+JRkGqk6jY=
 			</data>
 		</dict>
 		<key>Resources/flutter_assets/fonts/MaterialIcons-Regular.otf</key>
@@ -115,7 +163,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			pUmH9jh6TXptb6jDkCgJYXaFs+D3bC3tHBubievidl0=
+			6HsZQdntL6L3fassHoF6MgIHJXG3TY9c4MnaI/9IsH0=
 			</data>
 		</dict>
 		<key>Resources/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf</key>
@@ -123,6 +171,13 @@
 			<key>hash2</key>
 			<data>
 			Z8RP6Rg7AC553ef2l34piGYcmj5KPF/OloeH79vtgjw=
+			</data>
+		</dict>
+		<key>Resources/flutter_assets/packages/wakelock_plus/assets/no_sleep.js</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			3OTu8LGXtkCtaqqyIo7h7n3M+L1ta13lSE3RvRZDCng=
 			</data>
 		</dict>
 		<key>Resources/flutter_assets/shaders/ink_sparkle.frag</key>

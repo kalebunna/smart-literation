@@ -56,7 +56,7 @@ class ProfileScreen extends StatelessWidget {
                     ),
                     child: Center(
                       child: Text(
-                        user.name.substring(0, 1),
+                        user['user'].substring(0, 1),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 32,
@@ -72,12 +72,12 @@ class ProfileScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          user.name,
+                          user['name'],
                           style: AppStyles.heading3,
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          user.email,
+                          user['email'],
                           style: TextStyle(
                             color: AppColors.textSecondary,
                           ),

@@ -1,8 +1,11 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:education_game_app/constants/app_colors.dart';
 import 'package:education_game_app/constants/app_styles.dart';
-import 'package:education_game_app/providers/user_provider.dart';
 import 'package:education_game_app/screens/dashboard_screen.dart';
 import 'package:education_game_app/widgets/custom_button.dart';
 
@@ -10,7 +13,7 @@ class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
@@ -27,37 +30,79 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
+    if (!_formKey.currentState!.validate()) return;
 
-      try {
-        // Untuk dummy, kita langsung login saja
-        await Future.delayed(const Duration(seconds: 2));
+    final baseUrl = dotenv.env['API_BASE_URL'];
 
-        // Panggil login di provider untuk kondisi API sebenarnya
-        // await Provider.of<UserProvider>(context, listen: false).login(
-        //   _emailController.text,
-        //   _passwordController.text,
-        // );
+    if (baseUrl == null || baseUrl.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('API base URL tidak ditemukan di .env')),
+      );
+      return;
+    }
 
-        // Dummy data untuk user
-        Provider.of<UserProvider>(context, listen: false).setDummyUser();
+    setState(() => _isLoading = true);
 
-        // Navigate to dashboard
+    try {
+      final url = Uri.parse('$baseUrl/login');
+
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': _emailController.text.trim(),
+          'password': _passwordController.text.trim(),
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final token = data['data']['token'];
+        final user = data['data']['user'];
+
+        if (token == null) {
+          throw Exception('Token tidak ditemukan dalam respons login');
+        } else if (user == null) {
+          throw Exception('Data user tidak ditemukan dalam respons login');
+        }
+
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', token);
+        await prefs.setString('user', jsonEncode(user));
+
+        if (!mounted) return;
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const DashboardScreen()),
+          MaterialPageRoute(builder: (context) => const DashboardHomeScreen()),
         );
-      } catch (e) {
-        // Tampilkan pesan error
+      } else {
+        final responseBody = jsonDecode(response.body);
+        final errorMessage = responseBody['message']?.toString().toLowerCase();
+
+        String errorText;
+        if (errorMessage != null &&
+            (errorMessage.contains('email') ||
+                errorMessage.contains('username'))) {
+          errorText = 'Email yang kamu masukkan salah atau tidak terdaftar';
+        } else if (errorMessage != null && errorMessage.contains('password')) {
+          errorText = 'Password yang kamu masukkan salah';
+        } else {
+          errorText = 'Login gagal. Coba lagi.';
+        }
+
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Login gagal: ${e.toString()}')),
+          SnackBar(content: Text(errorText)),
         );
-      } finally {
-        setState(() {
-          _isLoading = false;
-        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Terjadi kesalahan: ${e.toString()}')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
       }
     }
   }
@@ -73,30 +118,16 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Form(
               key: _formKey,
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Logo dan judul
-                  const Icon(
-                    Icons.school,
-                    size: 80,
-                    color: AppColors.primary,
-                  ),
+                  const Icon(Icons.school, size: 80, color: AppColors.primary),
                   const SizedBox(height: 24),
-                  const Text(
-                    'Selamat Datang',
-                    textAlign: TextAlign.center,
-                    style: AppStyles.heading1,
-                  ),
+                  const Text('Selamat Datang',
+                      textAlign: TextAlign.center, style: AppStyles.heading1),
                   const SizedBox(height: 8),
-                  const Text(
-                    'Silahkan login untuk melanjutkan',
-                    textAlign: TextAlign.center,
-                    style: AppStyles.bodyMedium,
-                  ),
+                  const Text('Silahkan login untuk melanjutkan',
+                      textAlign: TextAlign.center, style: AppStyles.bodyMedium),
                   const SizedBox(height: 32),
-
-                  // Email input
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
@@ -112,8 +143,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                   ),
                   const SizedBox(height: 16),
-
-                  // Password input
                   TextFormField(
                     controller: _passwordController,
                     obscureText: true,
@@ -129,25 +158,19 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                   ),
                   const SizedBox(height: 24),
-
-                  // Login button
                   CustomButton(
                     text: 'Login',
                     isLoading: _isLoading,
                     onPressed: _login,
                   ),
                   const SizedBox(height: 16),
-
-                  // Forgot password
                   TextButton(
                     onPressed: () {
-                      // TODO: Implementasi forgot password
+                      // TODO: Tambahkan forgot password
                     },
                     child: const Text(
                       'Lupa Password?',
-                      style: TextStyle(
-                        color: AppColors.textSecondary,
-                      ),
+                      style: TextStyle(color: AppColors.textSecondary),
                     ),
                   ),
                 ],

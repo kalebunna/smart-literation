@@ -63,12 +63,14 @@ class _MaterialContentScreenState extends State<MaterialContentScreen> {
       if (material.type == model.MaterialType.PDF) {
         // Di implementasi sebenarnya, download PDF dari URL di material.fileUrl
         // Untuk dummy, tunda beberapa detik
-        await Future.delayed(const Duration(seconds: 2));
-        setState(() {
-          // Untuk pengembangan, kita tidak benar-benar memiliki file PDF
-          // Jadi hanya set flag loading menjadi false
-          _isLoading = false;
-        });
+        // await Future.delayed(const Duration(seconds: 2));
+        // setState(() {
+        //   // Untuk pengembangan, kita tidak benar-benar memiliki file PDF
+        //   // Jadi hanya set flag loading menjadi false
+        //   _isLoading = false;
+        //   _buildRealPdfView(context);
+        // });
+        await _downloadPDF(material.fileUrl);
       } else if (material.type == model.MaterialType.VIDEO) {
         // Di implementasi sebenarnya, init video player dengan URL di material.fileUrl
         // Untuk dummy, gunakan video dari internet
@@ -166,7 +168,7 @@ class _MaterialContentScreenState extends State<MaterialContentScreen> {
               children: [
                 Expanded(
                   child: material.type == model.MaterialType.PDF
-                      ? _buildPdfView(context)
+                      ? _buildRealPdfView(context)
                       : _buildVideoPlayer(context),
                 ),
                 Padding(

@@ -122,6 +122,12 @@
       "languageVersion": "2.17"
     },
     {
+      "name": "flutter_dotenv",
+      "rootUri": "file:///Users/kalebunna/.pub-cache/hosted/pub.dev/flutter_dotenv-5.2.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "flutter_lints",
       "rootUri": "file:///Users/kalebunna/.pub-cache/hosted/pub.dev/flutter_lints-2.0.3",
       "packageUri": "lib/",
@@ -560,7 +566,7 @@
       "languageVersion": "2.17"
     }
   ],
-  "generated": "2025-05-07T09:59:20.498260Z",
+  "generated": "2025-05-17T09:25:23.499954Z",
   "generator": "pub",
   "generatorVersion": "3.7.2",
   "flutterRoot": "file:///Users/kalebunna/flutter-sdk/flutter",

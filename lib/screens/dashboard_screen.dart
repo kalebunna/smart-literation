@@ -74,15 +74,8 @@ class DashboardHomeScreen extends StatelessWidget {
             Row(
               children: [
                 CircleAvatar(
-                  radius: 24,
-                  backgroundColor: AppColors.primary,
                   child: Text(
-                    user?.name.substring(0, 1) ?? 'U',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    (user?['name']?.toString().substring(0, 1) ?? 'U'),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -90,7 +83,7 @@ class DashboardHomeScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Halo, ${user?.name ?? 'Pengguna'}',
+                      'Halo, ${user?['name'] ?? 'Pengguna'}',
                       style: AppStyles.heading3,
                     ),
                     const Text(
@@ -111,79 +104,6 @@ class DashboardHomeScreen extends StatelessWidget {
             const SizedBox(height: 24),
 
             // Banner utama seperti gambar yang diberikan
-            Container(
-              width: double.infinity,
-              height: 160,
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              padding: const EdgeInsets.all(24),
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          "Let's play together",
-                          style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: () {
-                            // Navigasi ke halaman bab
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const ChapterListScreen(),
-                              ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: AppColors.primary,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 12,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                          ),
-                          child: const Text(
-                            'Play now',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Image.asset(
-                      'assets/images/trophy.png',
-                      // Jika tidak ada aset, gunakan icon
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Icon(
-                          Icons.emoji_events,
-                          size: 80,
-                          color: AppColors.secondary,
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
             const SizedBox(height: 24),
 
             // Kategori

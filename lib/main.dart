@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 import 'package:education_game_app/providers/user_provider.dart';
 import 'package:education_game_app/providers/chapter_provider.dart';
 import 'package:education_game_app/providers/material_provider.dart';
@@ -7,7 +9,14 @@ import 'package:education_game_app/providers/quiz_provider.dart';
 import 'package:education_game_app/screens/splash_screen.dart';
 import 'package:education_game_app/utils/route_generator.dart';
 
-void main() {
+Future<void> main() async {
+  // WAJIB untuk memastikan binding terpasang sebelum async/await
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Muat variabel lingkungan dari .env
+  await dotenv.load();
+
+  // Jalankan aplikasi
   runApp(const MyApp());
 }
 

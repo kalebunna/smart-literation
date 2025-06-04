@@ -27,7 +27,7 @@ class MaterialProvider extends ChangeNotifier {
           title: 'Mengenal Huruf Kapital',
           description:
               'Peserta didik mampu menuliskan huruf kapital dengan benar',
-          type: model.MaterialType.PDF,
+          type: model.MaterialType.VIDEO,
           fileUrl: 'assets/pdf/file.pdf',
           isLocked: false,
           order: 1,
@@ -40,7 +40,7 @@ class MaterialProvider extends ChangeNotifier {
           description:
               '⁠Peserta didik mampu membaca tatap/pemindaian(scanning)',
           type: model.MaterialType.PDF,
-          fileUrl: 'assets/pdf/file2.pdf',
+          fileUrl: 'http://berka.test/kapital.pdf',
           isLocked: false,
           order: 2,
           isCompleted: false,
@@ -50,7 +50,7 @@ class MaterialProvider extends ChangeNotifier {
           chapterId: chapterId,
           title: 'Menentukan Judul Penulis ',
           description: ' menentukan judul penulis ',
-          type: model.MaterialType.PDF,
+          type: model.MaterialType.VIDEO,
           fileUrl: 'assets/pdf/question_making.pdf',
           isLocked: true,
           order: 3,

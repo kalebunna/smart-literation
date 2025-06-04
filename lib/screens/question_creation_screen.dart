@@ -49,11 +49,7 @@ class _QuestionCreationScreenState extends State<QuestionCreationScreen> {
 
       // Contoh respons dummy
       setState(() {
-        _response =
-            'Metode SQ4R adalah teknik membaca yang terdiri dari Survey (melihat gambaran umum), '
-            'Question (membuat pertanyaan), Read (membaca), Recite (menceritakan kembali), '
-            'Reflect (merefleksikan), dan Review (mengulang kembali). '
-            'Metode ini membantu meningkatkan pemahaman dan retensi informasi dalam proses belajar.';
+        _response = '';
         _hasSubmitted = true;
       });
     } catch (e) {

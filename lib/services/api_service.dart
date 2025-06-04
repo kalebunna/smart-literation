@@ -3,20 +3,44 @@ import 'package:http/http.dart' as http;
 import 'package:education_game_app/models/chapter_model.dart';
 import 'package:education_game_app/models/material_model.dart';
 import 'package:education_game_app/models/question_model.dart';
+import 'package:education_game_app/models/user_model.dart';
 import 'package:education_game_app/utils/api_response_handler.dart';
 
 class ApiService {
   final String baseUrl =
-      'https://api.sq4rapp.com'; // Ganti dengan URL API sebenarnya
+      'http://127.0.0.1:8000/api'; // Ganti dengan URL API sebenarnya
 
   // Headers umum untuk request
-  Map<String, String> _getHeaders() {
-    return {
+  Map<String, String> _getHeaders({String? token}) {
+    final headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      // Tambahkan header otentikasi jika diperlukan
-      // 'Authorization': 'Bearer $token',
     };
+
+    if (token != null) {
+      headers['Authorization'] = 'Bearer $token';
+    }
+
+    return headers;
+  }
+
+  // Endpoint: POST /login
+  Future<ApiResponse<Map<String, dynamic>>> login(
+      String email, String password) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/login'),
+        headers: _getHeaders(),
+        body: jsonEncode({
+          'email': email,
+          'password': password,
+        }),
+      );
+
+      return _handleResponse<Map<String, dynamic>>(response);
+    } catch (e) {
+      return ApiResponse.error('Failed to login: $e');
+    }
   }
 
   // Endpoint: GET /chapters
@@ -140,18 +164,34 @@ class ApiService {
 
   // Penanganan respons API
   ApiResponse<T> _handleResponse<T>(http.Response response) {
-    if (response.statusCode >= 200 && response.statusCode < 300) {
+    try {
       final dynamic responseData = json.decode(response.body);
-      return ApiResponse<T>.success(responseData as T);
-    } else {
-      String errorMessage;
-      try {
-        final dynamic responseData = json.decode(response.body);
-        errorMessage = responseData['message'] ?? 'Unknown error occurred';
-      } catch (e) {
-        errorMessage = 'Error processing response: ${response.statusCode}';
+
+      // Cek apakah backend mengembalikan field 'success'
+      if (responseData is Map<String, dynamic> &&
+          responseData.containsKey('success')) {
+        if (responseData['success'] == true) {
+          return ApiResponse<T>.success(responseData as T);
+        } else {
+          // Backend mengembalikan success: false
+          String errorMessage = responseData['message'] ??
+              responseData['error'] ??
+              'Unknown error occurred';
+          return ApiResponse<T>.error(errorMessage);
+        }
       }
-      throw Exception(errorMessage);
+
+      // Fallback untuk response tanpa field 'success'
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return ApiResponse<T>.success(responseData as T);
+      } else {
+        String errorMessage =
+            responseData['message'] ?? 'Unknown error occurred';
+        return ApiResponse<T>.error(errorMessage);
+      }
+    } catch (e) {
+      return ApiResponse<T>.error(
+          'Error processing response: ${response.statusCode}');
     }
   }
 }

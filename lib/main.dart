@@ -14,7 +14,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Muat variabel lingkungan dari .env
-  await dotenv.load();
+  // await dotenv.load();
 
   // Jalankan aplikasi
   runApp(const MyApp());

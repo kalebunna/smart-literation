@@ -7,6 +7,7 @@ class Material {
   final String description;
   final MaterialType type;
   final String fileUrl;
+  final String greading; // Field untuk konten HTML dari API
   final bool isLocked;
   final int order;
   final bool isCompleted;
@@ -19,6 +20,7 @@ class Material {
     required this.description,
     required this.type,
     required this.fileUrl,
+    required this.greading,
     required this.isLocked,
     required this.order,
     required this.isCompleted,
@@ -28,30 +30,32 @@ class Material {
   factory Material.fromJson(Map<String, dynamic> json) {
     return Material(
       id: json['id'],
-      chapterId: json['chapter_id'],
-      title: json['title'],
-      description: json['description'],
-      type: json['type'] == 'pdf' ? MaterialType.PDF : MaterialType.VIDEO,
-      fileUrl: json['file_url'],
-      isLocked: json['is_locked'] ?? true,
-      order: json['order'] ?? 0,
-      isCompleted: json['is_completed'] ?? false,
-      score: json['score'],
+      chapterId: 0, // Akan diset dari luar
+      title: json['nama_materi'],
+      description:
+          json['nama_materi'], // Gunakan nama_materi sebagai description
+      type: (json['jenis_materi'] == 'pdf')
+          ? MaterialType.PDF
+          : MaterialType.VIDEO,
+      fileUrl: json['file_materi'] ?? '',
+      greading: json['greading'] ?? '',
+      isLocked:
+          !(json['is_unlocked'] ?? true), // Default unlocked jika tidak ada
+      order: json['id'], // Gunakan id sebagai order
+      isCompleted: json['is_done'] ?? false,
+      score: null, // Score belum ada di API
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'chapter_id': chapterId,
-      'title': title,
-      'description': description,
-      'type': type == MaterialType.PDF ? 'pdf' : 'video',
-      'file_url': fileUrl,
-      'is_locked': isLocked,
-      'order': order,
-      'is_completed': isCompleted,
-      'score': score,
+      'nama_materi': title,
+      'file_materi': fileUrl,
+      'jenis_materi': type == MaterialType.PDF ? 'pdf' : 'video',
+      'greading': greading,
+      'is_done': isCompleted,
+      'is_unlocked': !isLocked,
     };
   }
 }

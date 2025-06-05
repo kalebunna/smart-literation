@@ -128,6 +128,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "flutter_html",
+      "rootUri": "file:///Users/kalebunna/.pub-cache/hosted/pub.dev/flutter_html-3.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
       "name": "flutter_lints",
       "rootUri": "file:///Users/kalebunna/.pub-cache/hosted/pub.dev/flutter_lints-2.0.3",
       "packageUri": "lib/",
@@ -204,6 +210,12 @@
       "rootUri": "file:///Users/kalebunna/.pub-cache/hosted/pub.dev/lints-2.1.1",
       "packageUri": "lib/",
       "languageVersion": "3.0"
+    },
+    {
+      "name": "list_counter",
+      "rootUri": "file:///Users/kalebunna/.pub-cache/hosted/pub.dev/list_counter-1.0.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.18"
     },
     {
       "name": "matcher",
@@ -566,7 +578,7 @@
       "languageVersion": "2.17"
     }
   ],
-  "generated": "2025-05-17T09:25:23.499954Z",
+  "generated": "2025-06-05T15:44:20.729384Z",
   "generator": "pub",
   "generatorVersion": "3.7.2",
   "flutterRoot": "file:///Users/kalebunna/flutter-sdk/flutter",

@@ -12,59 +12,7 @@ class MaterialProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
-  // Untuk implementasi dummy
-  Future<void> loadDummyMaterials(int chapterId) async {
-    _setLoading(true);
-
-    try {
-      // Simulasi delay jaringan
-      await Future.delayed(const Duration(seconds: 1));
-
-      _materials = [
-        model.Material(
-          id: 1,
-          chapterId: chapterId,
-          title: 'Mengenal Huruf Kapital',
-          description:
-              'Peserta didik mampu menuliskan huruf kapital dengan benar',
-          type: model.MaterialType.VIDEO,
-          fileUrl: 'assets/pdf/file.pdf',
-          isLocked: false,
-          order: 1,
-          isCompleted: true,
-        ),
-        model.Material(
-          id: 2,
-          chapterId: chapterId,
-          title: 'Tehnik Membaca',
-          description:
-              '⁠Peserta didik mampu membaca tatap/pemindaian(scanning)',
-          type: model.MaterialType.PDF,
-          fileUrl: 'http://berka.test/kapital.pdf',
-          isLocked: false,
-          order: 2,
-          isCompleted: false,
-        ),
-        model.Material(
-          id: 3,
-          chapterId: chapterId,
-          title: 'Menentukan Judul Penulis ',
-          description: ' menentukan judul penulis ',
-          type: model.MaterialType.VIDEO,
-          fileUrl: 'assets/pdf/question_making.pdf',
-          isLocked: true,
-          order: 3,
-          isCompleted: false,
-        ),
-      ];
-
-      _setLoading(false);
-    } catch (e) {
-      _setError(e.toString());
-    }
-  }
-
-  // Untuk implementasi API sebenarnya
+  // Menggunakan API endpoint /materi/{babId}
   Future<void> getMaterialsByChapterId(int chapterId) async {
     _setLoading(true);
 
@@ -101,6 +49,7 @@ class MaterialProvider extends ChangeNotifier {
         description: material.description,
         type: material.type,
         fileUrl: material.fileUrl,
+        greading: material.greading,
         isLocked: material.isLocked,
         order: material.order,
         isCompleted: true,
@@ -117,6 +66,7 @@ class MaterialProvider extends ChangeNotifier {
           description: nextMaterial.description,
           type: nextMaterial.type,
           fileUrl: nextMaterial.fileUrl,
+          greading: nextMaterial.greading,
           isLocked: false,
           order: nextMaterial.order,
           isCompleted: nextMaterial.isCompleted,
@@ -126,14 +76,13 @@ class MaterialProvider extends ChangeNotifier {
 
       notifyListeners();
 
-      // Implementasi nyata: update status ke API
-      try {
-        final apiService = ApiService();
-        apiService.completeMaterial(materialId, score);
-      } catch (e) {
-        // Penanganan error API
-        print('Error updating material status: $e');
-      }
+      // Update status ke API (sementara dikomentari karena endpoint belum ada)
+      // try {
+      //   final apiService = ApiService();
+      //   apiService.completeMaterial(materialId, score);
+      // } catch (e) {
+      //   print('Error updating material status: $e');
+      // }
     }
   }
 

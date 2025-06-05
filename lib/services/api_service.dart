@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:education_game_app/models/chapter_model.dart';
-import 'package:education_game_app/models/material_model.dart';
+import 'package:education_game_app/models/material_model.dart' as model;
 import 'package:education_game_app/models/question_model.dart';
 import 'package:education_game_app/models/user_model.dart';
 import 'package:education_game_app/utils/api_response_handler.dart';
@@ -50,7 +50,7 @@ class ApiService {
     }
   }
 
-  // Endpoint: GET /list-babs (Updated untuk menggunakan endpoint yang benar)
+  // Endpoint: GET /list-babs
   Future<List<Chapter>> getChapters() async {
     try {
       final response = await http.get(
@@ -72,16 +72,39 @@ class ApiService {
     }
   }
 
-  // Endpoint: GET /chapters/{chapterId}/materials
-  Future<List<Material>> getMaterialsByChapterId(int chapterId) async {
+  // Endpoint: GET /materi/{babId}
+  Future<List<model.Material>> getMaterialsByChapterId(int chapterId) async {
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/chapters/$chapterId/materials'),
+        Uri.parse('$baseUrl/materi/$chapterId'),
         headers: await _getHeaders(),
       );
 
-      final apiResponse = _handleResponse<List<dynamic>>(response);
-      return apiResponse.data!.map((json) => Material.fromJson(json)).toList();
+      final apiResponse = _handleResponse<Map<String, dynamic>>(response);
+
+      if (apiResponse.success && apiResponse.data != null) {
+        final data = apiResponse.data!;
+        final List<dynamic> materialsData = data['data'] ?? [];
+        return materialsData.map((json) {
+          final material = model.Material.fromJson(json);
+          // Set chapterId yang benar
+          return model.Material(
+            id: material.id,
+            chapterId: chapterId,
+            title: material.title,
+            description: material.description,
+            type: material.type,
+            fileUrl: material.fileUrl,
+            greading: material.greading,
+            isLocked: material.isLocked,
+            order: material.order,
+            isCompleted: material.isCompleted,
+            score: material.score,
+          );
+        }).toList();
+      } else {
+        throw Exception(apiResponse.error ?? 'Failed to load materials');
+      }
     } catch (e) {
       throw Exception('Failed to load materials: $e');
     }

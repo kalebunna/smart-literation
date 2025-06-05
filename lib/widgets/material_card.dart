@@ -80,23 +80,23 @@ class MaterialCard extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      if (material.isCompleted && material.score != null)
+                      if (material.isCompleted)
                         Padding(
                           padding: const EdgeInsets.only(top: 8),
                           child: Row(
                             children: [
                               const Icon(
-                                Icons.star,
-                                color: Colors.amber,
+                                Icons.check_circle,
+                                color: AppColors.success,
                                 size: 16,
                               ),
                               const SizedBox(width: 4),
-                              Text(
-                                'Skor: ${material.score}/10',
-                                style: const TextStyle(
+                              const Text(
+                                'Selesai',
+                                style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w500,
-                                  color: Colors.amber,
+                                  color: AppColors.success,
                                 ),
                               ),
                             ],

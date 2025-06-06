@@ -1,1 +1,0 @@
-@rpath/smart_literation_v1.debug.dylib

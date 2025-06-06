@@ -135,6 +135,59 @@ class ApiService {
     }
   }
 
+  // Endpoint: GET /soal-greeding/{materi_id}
+  Future<Map<String, dynamic>> getGreedingQuestion(int materialId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/soal-greeding/$materialId'),
+        headers: await _getHeaders(),
+      );
+
+      final apiResponse = _handleResponse<Map<String, dynamic>>(response);
+
+      if (apiResponse.success && apiResponse.data != null) {
+        final data = apiResponse.data!;
+        return {
+          'id_soal': data['data']['id_soal'] ?? 0,
+          'soal': data['data']['soal'] ?? '',
+        };
+      } else {
+        throw Exception(apiResponse.error ?? 'Failed to load question prompt');
+      }
+    } catch (e) {
+      throw Exception('Failed to load question prompt: $e');
+    }
+  }
+
+// Endpoint: POST /greading-assesment
+  Future<Map<String, dynamic>> submitGreedingAssessment(
+      int soalId, String jawabanSiswa) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/greading-assesment'),
+        headers: await _getHeaders(),
+        body: jsonEncode({
+          'soal_id': soalId,
+          'jawaban_siswa': jawabanSiswa,
+        }),
+      );
+
+      final apiResponse = _handleResponse<Map<String, dynamic>>(response);
+
+      if (apiResponse.success && apiResponse.data != null) {
+        final data = apiResponse.data!;
+        return {
+          'feedback': data['data']['feedback'] ?? '',
+          'nilai': data['data']['nilai'] ?? 0,
+        };
+      } else {
+        throw Exception(apiResponse.error ?? 'Failed to submit question');
+      }
+    } catch (e) {
+      throw Exception('Failed to submit question: $e');
+    }
+  }
+
   // Endpoint: GET /materials/{materialId}/questions
   Future<List<QuizQuestion>> getQuestionsByMaterialId(int materialId) async {
     try {

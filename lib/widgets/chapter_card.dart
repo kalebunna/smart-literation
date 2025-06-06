@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:education_game_app/constants/app_colors.dart';
-import 'package:education_game_app/constants/app_styles.dart';
+// import 'package:education_game_app/constants/app_colors.dart';
+// import 'package:education_game_app/constants/app_styles.dart';
 import 'package:education_game_app/models/chapter_model.dart';
 
 class ChapterCard extends StatefulWidget {

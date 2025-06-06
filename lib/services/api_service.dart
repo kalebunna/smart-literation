@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'package:education_game_app/models/reading_material_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:education_game_app/models/chapter_model.dart';
+
 import 'package:education_game_app/models/material_model.dart' as model;
 import 'package:education_game_app/models/question_model.dart';
 import 'package:education_game_app/models/user_model.dart';
@@ -50,7 +52,7 @@ class ApiService {
     }
   }
 
-  // Endpoint: GET /list-babs
+  // Endpoint: GET /list-babs (Updated untuk menggunakan endpoint yang benar)
   Future<List<Chapter>> getChapters() async {
     try {
       final response = await http.get(
@@ -72,7 +74,30 @@ class ApiService {
     }
   }
 
-  // Endpoint: GET /materi/{babId}
+  Future<List<ReadingMaterial>> getReadingMaterials() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/bahan-bacaan'),
+        headers: await _getHeaders(),
+      );
+
+      final apiResponse = _handleResponse<Map<String, dynamic>>(response);
+
+      if (apiResponse.success && apiResponse.data != null) {
+        final data = apiResponse.data!;
+        final List<dynamic> materialsData = data['data'] ?? [];
+        return materialsData
+            .map((json) => ReadingMaterial.fromJson(json))
+            .toList();
+      } else {
+        throw Exception(
+            apiResponse.error ?? 'Failed to load reading materials');
+      }
+    } catch (e) {
+      throw Exception('Failed to load reading materials: $e');
+    }
+  }
+
   Future<List<model.Material>> getMaterialsByChapterId(int chapterId) async {
     try {
       final response = await http.get(

@@ -13,6 +13,20 @@ class QuizProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
+  // Untuk implementasi API sebenarnya
+  Future<void> getQuestionsByMaterialId(int materialId) async {
+    _setLoading(true);
+
+    try {
+      final apiService = ApiService();
+      final questions = await apiService.getQuestionsByMaterialId(materialId);
+      _questions = questions;
+      _setLoading(false);
+    } catch (e) {
+      _setError(e.toString());
+    }
+  }
+
   // Untuk implementasi dummy
   Future<void> loadDummyQuestions() async {
     _setLoading(true);
@@ -374,20 +388,6 @@ class QuizProvider extends ChangeNotifier {
         ),
       ];
 
-      _setLoading(false);
-    } catch (e) {
-      _setError(e.toString());
-    }
-  }
-
-  // Untuk implementasi API sebenarnya
-  Future<void> getQuestionsByMaterialId(int materialId) async {
-    _setLoading(true);
-
-    try {
-      final apiService = ApiService();
-      final questions = await apiService.getQuestionsByMaterialId(materialId);
-      _questions = questions;
       _setLoading(false);
     } catch (e) {
       _setError(e.toString());

@@ -1,5 +1,6 @@
 import 'package:education_game_app/models/reading_material_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:education_game_app/constants/app_colors.dart';
 import 'package:education_game_app/constants/app_styles.dart';
 import 'package:education_game_app/services/api_service.dart';
@@ -30,7 +31,9 @@ class _ReadingMaterialScreenState extends State<ReadingMaterialScreen>
   void initState() {
     super.initState();
     _setupAnimations();
-    _loadMaterials();
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _loadMaterials();
+    });
   }
 
   @override

@@ -1,4 +1,10 @@
 # This is a generated file; do not edit or check into version control.
+audioplayers=/Users/kalebunna/.pub-cache/hosted/pub.dev/audioplayers-5.2.1/
+audioplayers_android=/Users/kalebunna/.pub-cache/hosted/pub.dev/audioplayers_android-4.0.3/
+audioplayers_darwin=/Users/kalebunna/.pub-cache/hosted/pub.dev/audioplayers_darwin-5.0.2/
+audioplayers_linux=/Users/kalebunna/.pub-cache/hosted/pub.dev/audioplayers_linux-3.1.0/
+audioplayers_web=/Users/kalebunna/.pub-cache/hosted/pub.dev/audioplayers_web-4.1.0/
+audioplayers_windows=/Users/kalebunna/.pub-cache/hosted/pub.dev/audioplayers_windows-3.1.0/
 flutter_pdfview=/Users/kalebunna/.pub-cache/hosted/pub.dev/flutter_pdfview-1.4.0+1/
 package_info_plus=/Users/kalebunna/.pub-cache/hosted/pub.dev/package_info_plus-8.3.0/
 path_provider=/Users/kalebunna/.pub-cache/hosted/pub.dev/path_provider-2.1.5/

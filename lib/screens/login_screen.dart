@@ -1,8 +1,6 @@
-import 'dart:convert';
 // import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:education_game_app/constants/app_colors.dart';
 // import 'package:education_game_app/constants/app_styles.dart';
@@ -99,20 +97,17 @@ class _LoginScreenState extends State<LoginScreen>
           throw Exception('Data user tidak ditemukan dalam respons login');
         }
 
-        // Simpan token dan user data ke SharedPreferences
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('token', token);
-        await prefs.setString('user', jsonEncode(userData));
-
-        // Set user data ke provider
+        // Set user data ke provider (akan otomatis tersimpan ke SharedPreferences)
         if (!mounted) return;
         final userProvider = Provider.of<UserProvider>(context, listen: false);
-        userProvider.setUserFromApi(userData, token);
+        await userProvider.setUserFromApi(userData, token);
 
         // Navigate ke dashboard
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const DashboardScreen()),
-        );
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const DashboardScreen()),
+          );
+        }
       } else {
         // Handle error response
         String errorText = _getErrorMessage(response.error ?? 'Login gagal');
@@ -214,12 +209,15 @@ class _LoginScreenState extends State<LoginScreen>
                               ),
                               child: Stack(
                                 children: [
-                                  // Main character
-                                  const Center(
-                                    child: Icon(
-                                      Icons.school,
-                                      size: 60,
-                                      color: AppColors.primary,
+                                  // Main character - Logo
+                                  Center(
+                                    child: ClipOval(
+                                      child: Image.asset(
+                                        'assets/icons/logo.png',
+                                        width: 80,
+                                        height: 80,
+                                        fit: BoxFit.contain,
+                                      ),
                                     ),
                                   ),
                                   // Sparkle effects
@@ -245,6 +243,17 @@ class _LoginScreenState extends State<LoginScreen>
                               ),
                             ),
                             const SizedBox(height: 20),
+                            // App Title
+                            const Text(
+                              'SMART LITERATION',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primary,
+                                letterSpacing: 1.5,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
                             // Fun clouds decoration
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -429,62 +438,7 @@ class _LoginScreenState extends State<LoginScreen>
                         ),
                       ),
                       const SizedBox(height: 20),
-
-                      // Forgot Password with Fun Design
-                      Center(
-                        child: TextButton(
-                          onPressed: () {
-                            // TODO: Tambahkan forgot password
-                          },
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.help_outline,
-                                color: AppColors.textSecondary,
-                                size: 18,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                'Lupa Password?',
-                                style: TextStyle(
-                                  color: AppColors.textSecondary,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
                       const SizedBox(height: 20),
-
-                      // Fun footer decorations
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.favorite,
-                              color: Colors.red.shade300, size: 20),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Belajar itu Menyenangkan!',
-                            style: TextStyle(
-                              color: AppColors.textSecondary,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Icon(Icons.favorite,
-                              color: Colors.red.shade300, size: 20),
-                        ],
-                      ),
                     ],
                   ),
                 ),

@@ -20,6 +20,21 @@ class RouteGenerator {
     // Mendapatkan argumen yang dikirimkan
     final args = settings.arguments;
 
+    // Handle dynamic routes for final test
+    if (settings.name != null && RegExp(r'^/final-test/(\d+)$').hasMatch(settings.name!)) {
+      final match = RegExp(r'^/final-test/(\d+)$').firstMatch(settings.name!);
+      if (match != null) {
+        final materialId = int.parse(match.group(1)!);
+        return MaterialPageRoute(
+          builder: (_) => FinalTestScreen(
+            materialId: materialId,
+            midtestScore: 0,
+            totalMidtestQuestions: 0,
+          ),
+        );
+      }
+    }
+
     switch (settings.name) {
       case '/':
         return MaterialPageRoute(builder: (_) => const SplashScreen());

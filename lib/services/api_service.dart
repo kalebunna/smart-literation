@@ -7,6 +7,9 @@ import 'package:education_game_app/models/chapter_model.dart';
 import 'package:education_game_app/models/material_model.dart' as model;
 import 'package:education_game_app/models/question_model.dart';
 import 'package:education_game_app/models/user_model.dart';
+import 'package:education_game_app/models/summary_model.dart';
+import 'package:education_game_app/models/reflection_model.dart';
+import 'package:education_game_app/models/dashboard_model.dart';
 import 'package:education_game_app/utils/api_response_handler.dart';
 
 class ApiService {
@@ -188,38 +191,53 @@ class ApiService {
     }
   }
 
-  // Endpoint: GET /materials/{materialId}/questions
+  // Endpoint: GET /soal-quiz/{materialId}
   Future<List<QuizQuestion>> getQuestionsByMaterialId(int materialId) async {
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/materials/$materialId/questions'),
+        Uri.parse('$baseUrl/soal-quiz/$materialId'),
         headers: await _getHeaders(),
       );
 
-      final apiResponse = _handleResponse<List<dynamic>>(response);
-      return apiResponse.data!
-          .map((json) => QuizQuestion.fromJson(json))
-          .toList();
+      final apiResponse = _handleResponse<Map<String, dynamic>>(response);
+
+      if (apiResponse.success && apiResponse.data != null) {
+        final data = apiResponse.data!;
+        final List<dynamic> questionsData = data['data'] ?? [];
+        return questionsData
+            .map((json) => QuizQuestion.fromJson(json))
+            .toList();
+      } else {
+        throw Exception(apiResponse.error ?? 'Failed to load questions');
+      }
     } catch (e) {
       throw Exception('Failed to load questions: $e');
     }
   }
 
-  // Endpoint: GET /materials/{materialId}/final-questions
+  // Endpoint: GET /final-test/{materialId}
   Future<List<QuizQuestion>> getFinalQuestionsByMaterialId(
       int materialId) async {
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/materials/$materialId/final-questions'),
+        Uri.parse('$baseUrl/final-test/$materialId'),
         headers: await _getHeaders(),
       );
 
-      final apiResponse = _handleResponse<List<dynamic>>(response);
-      return apiResponse.data!
-          .map((json) => QuizQuestion.fromJson(json))
-          .toList();
+      final apiResponse = _handleResponse<Map<String, dynamic>>(response);
+
+      if (apiResponse.success && apiResponse.data != null) {
+        final data = apiResponse.data!;
+        final List<dynamic> questionsData = data['data'] ?? [];
+        return questionsData
+            .map((json) => QuizQuestion.fromJson(json))
+            .toList();
+      } else {
+        throw Exception(
+            apiResponse.error ?? 'Failed to load final test questions');
+      }
     } catch (e) {
-      throw Exception('Failed to load final questions: $e');
+      throw Exception('Failed to load final test questions: $e');
     }
   }
 
@@ -274,6 +292,190 @@ class ApiService {
       _handleResponse(response);
     } catch (e) {
       throw Exception('Failed to complete material: $e');
+    }
+  }
+
+  // Endpoint: GET /rangkuman/{materialId}
+  Future<List<SummaryParagraph>> getSummaryByMaterialId(int materialId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/rangkuman/$materialId'),
+        headers: await _getHeaders(),
+      );
+
+      final apiResponse = _handleResponse<Map<String, dynamic>>(response);
+
+      if (apiResponse.success && apiResponse.data != null) {
+        final data = apiResponse.data!;
+        final List<dynamic> summaryData = data['data'] ?? [];
+        return summaryData
+            .map((json) => SummaryParagraph.fromJson(json))
+            .toList();
+      } else {
+        throw Exception(apiResponse.error ?? 'Failed to load summary');
+      }
+    } catch (e) {
+      throw Exception('Failed to load summary: $e');
+    }
+  }
+
+  // Endpoint: POST /jawaban-user
+  Future<Map<String, dynamic>> submitFinalTestAnswers(
+      List<Map<String, dynamic>> jawaban, int skor, int materialId) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/jawaban-user'),
+        headers: await _getHeaders(),
+        body: jsonEncode({
+          'jawaban': jawaban,
+          'skor': skor,
+          'materi_id': materialId,
+        }),
+      );
+
+      final apiResponse = _handleResponse<Map<String, dynamic>>(response);
+
+      if (apiResponse.success && apiResponse.data != null) {
+        return apiResponse.data!;
+      } else {
+        throw Exception(
+            apiResponse.error ?? 'Failed to submit final test answers');
+      }
+    } catch (e) {
+      throw Exception('Failed to submit final test answers: $e');
+    }
+  }
+
+  // Endpoint: GET /dashboard
+  Future<DashboardData> getDashboardData() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/dashboard'),
+        headers: await _getHeaders(),
+      );
+
+      final apiResponse = _handleResponse<Map<String, dynamic>>(response);
+      
+      if (apiResponse.success && apiResponse.data != null) {
+        final data = apiResponse.data!;
+        return DashboardData.fromJson(data['data'] ?? data);
+      } else {
+        throw Exception(apiResponse.error ?? 'Failed to load dashboard data');
+      }
+    } catch (e) {
+      throw Exception('Failed to load dashboard data: $e');
+    }
+  }
+
+  // Endpoint: POST /dashboard with body
+  Future<ApiResponse<Map<String, dynamic>>> dashboard(Map<String, dynamic> body) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/dashboard'),
+        headers: await _getHeaders(),
+        body: jsonEncode(body),
+      );
+
+      return _handleResponse<Map<String, dynamic>>(response);
+    } catch (e) {
+      return ApiResponse<Map<String, dynamic>>(
+        success: false,
+        error: 'Failed to load dashboard data: $e',
+      );
+    }
+  }
+  
+  // Alternative: GET /dashboard with query parameters
+  Future<ApiResponse<Map<String, dynamic>>> dashboardWithQuery(Map<String, dynamic> params) async {
+    try {
+      final uri = Uri.parse('$baseUrl/dashboard').replace(queryParameters: 
+        params.map((key, value) => MapEntry(key, value.toString())));
+      
+      final response = await http.get(
+        uri,
+        headers: await _getHeaders(),
+      );
+
+      return _handleResponse<Map<String, dynamic>>(response);
+    } catch (e) {
+      return ApiResponse<Map<String, dynamic>>(
+        success: false,
+        error: 'Failed to load dashboard data: $e',
+      );
+    }
+  }
+
+  // Endpoint: POST /logout
+  Future<Map<String, dynamic>> logout() async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/logout'),
+        headers: await _getHeaders(),
+      );
+
+      final apiResponse = _handleResponse<Map<String, dynamic>>(response);
+      
+      if (apiResponse.success) {
+        // Clear stored token
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove('token');
+        await prefs.remove('user_data');
+        
+        return apiResponse.data ?? {'message': 'Logout successful'};
+      } else {
+        throw Exception(apiResponse.error ?? 'Failed to logout');
+      }
+    } catch (e) {
+      throw Exception('Failed to logout: $e');
+    }
+  }
+
+  // Endpoint: GET /reflection/{materialId}
+  Future<ReflectionQuestion?> getReflectionQuestion(int materialId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/reflection/$materialId'),
+        headers: await _getHeaders(),
+      );
+
+      final apiResponse = _handleResponse<Map<String, dynamic>>(response);
+      
+      if (apiResponse.success && apiResponse.data != null) {
+        final data = apiResponse.data!;
+        if (data['data'] != null) {
+          return ReflectionQuestion.fromJson(data['data']);
+        } else {
+          return null; // No reflection question available
+        }
+      } else {
+        throw Exception(apiResponse.error ?? 'Failed to load reflection question');
+      }
+    } catch (e) {
+      throw Exception('Failed to load reflection question: $e');
+    }
+  }
+
+  // Endpoint: POST /reflection
+  Future<Map<String, dynamic>> submitReflection(int soalId, String jawaban) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/reflection'),
+        headers: await _getHeaders(),
+        body: jsonEncode({
+          'soal_id': soalId,
+          'jawaban': jawaban,
+        }),
+      );
+
+      final apiResponse = _handleResponse<Map<String, dynamic>>(response);
+      
+      if (apiResponse.success && apiResponse.data != null) {
+        return apiResponse.data!;
+      } else {
+        throw Exception(apiResponse.error ?? 'Failed to submit reflection');
+      }
+    } catch (e) {
+      throw Exception('Failed to submit reflection: $e');
     }
   }
 

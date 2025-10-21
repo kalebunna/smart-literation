@@ -684,7 +684,7 @@ class _QuestionCreationScreenState extends State<QuestionCreationScreen>
               ),
               const SizedBox(width: 12),
               const Text(
-                'Tulis Pertanyaanmu! ✏️',
+                'Tuliskan Pertanyaanmu! ✏️',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -710,12 +710,6 @@ class _QuestionCreationScreenState extends State<QuestionCreationScreen>
               maxLines: 6,
               enabled: !_hasSubmitted,
               decoration: const InputDecoration(
-                hintText:
-                    'Contoh: Apa itu metode SQ4R dan bagaimana cara menggunakannya dalam belajar?',
-                hintStyle: TextStyle(
-                  color: Color(0xFF9CA3AF),
-                  fontSize: 16,
-                ),
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.all(20),
               ),

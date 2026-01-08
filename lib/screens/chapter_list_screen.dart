@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:education_game_app/constants/app_colors.dart';
-import 'package:education_game_app/constants/app_styles.dart';
 import 'package:education_game_app/models/chapter_model.dart';
 import 'package:education_game_app/providers/chapter_provider.dart';
 import 'package:education_game_app/screens/material_list_screen.dart';
@@ -218,12 +216,15 @@ class _ChapterListScreenState extends State<ChapterListScreen>
                             size: 24,
                           ),
                           const SizedBox(width: 8),
-                          const Text(
-                            'Petualangan Belajar!',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF6366F1),
+                          Flexible(
+                            child: Text(
+                              'Petualangan Belajar!',
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF6366F1),
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           const SizedBox(width: 8),

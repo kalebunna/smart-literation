@@ -1,8 +1,6 @@
 import 'package:education_game_app/models/reading_material_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:education_game_app/constants/app_colors.dart';
-import 'package:education_game_app/constants/app_styles.dart';
 import 'package:education_game_app/services/api_service.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'dart:io';
@@ -124,166 +122,134 @@ class _ReadingMaterialScreenState extends State<ReadingMaterialScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFFE3F2FD),
-              Color(0xFFF3E5F5),
-              Color(0xFFFFF8E1),
+              Colors.white,
+              Colors.blue.shade50,
+              Colors.purple.shade50,
             ],
           ),
         ),
         child: SafeArea(
           child: Column(
             children: [
-              // Header yang menyenangkan
+              // Header yang modern dan menarik
               Container(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    // Animasi karakter buku
-                    _floatingAnimation != null
-                        ? AnimatedBuilder(
-                            animation: _floatingAnimation!,
-                            builder: (context, child) {
-                              return Transform.translate(
-                                offset: Offset(0, _floatingAnimation!.value),
-                                child: Container(
-                                  width: 80,
-                                  height: 80,
-                                  decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                      colors: [
-                                        Color(0xFFFF6B6B),
-                                        Color(0xFFFFE66D)
-                                      ],
-                                    ),
-                                    shape: BoxShape.circle,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.orange.withOpacity(0.3),
-                                        blurRadius: 15,
-                                        offset: const Offset(0, 5),
-                                      ),
-                                    ],
-                                  ),
-                                  child: const Icon(
-                                    Icons.menu_book,
-                                    size: 40,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              );
-                            },
-                          )
-                        : Container(
-                            width: 80,
-                            height: 80,
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFFFF6B6B), Color(0xFFFFE66D)],
-                              ),
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.orange.withOpacity(0.3),
-                                  blurRadius: 15,
-                                  offset: const Offset(0, 5),
-                                ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.menu_book,
-                              size: 40,
-                              color: Colors.white,
-                            ),
-                          ),
-                    const SizedBox(height: 16),
-                    // Judul yang menyenangkan
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(25),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 10,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.local_library,
-                            color: Colors.orange.shade400,
-                            size: 24,
-                          ),
-                          const SizedBox(width: 8),
-                          const Text(
-                            'Perpustakaan Kecil!',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFFFF6B6B),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Icon(
-                            Icons.local_library,
-                            color: Colors.orange.shade400,
-                            size: 24,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    // Subtitle lucu
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.8),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Text(
-                        'Pilih buku yang ingin kamu baca! 📚✨',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Color(0xFF64748B),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.white,
+                      Colors.blue.shade50,
+                    ],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
                     ),
                   ],
                 ),
-              ),
-
-              // Floating clouds decoration
-              Container(
-                height: 50,
-                child: Stack(
+                child: Column(
                   children: [
-                    Positioned(
-                      left: 20,
-                      top: 10,
-                      child: _buildFloatingCloud(Colors.blue.shade100, 30, 0.5),
-                    ),
-                    Positioned(
-                      right: 30,
-                      top: 5,
-                      child: _buildFloatingCloud(Colors.pink.shade100, 25, 1.0),
-                    ),
-                    Positioned(
-                      left: MediaQuery.of(context).size.width * 0.4,
-                      top: 15,
-                      child:
-                          _buildFloatingCloud(Colors.green.shade100, 20, 1.5),
+                    Row(
+                      children: [
+                        // Icon dengan animasi
+                        _floatingAnimation != null
+                            ? AnimatedBuilder(
+                                animation: _floatingAnimation!,
+                                builder: (context, child) {
+                                  return Transform.translate(
+                                    offset: Offset(
+                                        0, _floatingAnimation!.value * 0.5),
+                                    child: Container(
+                                      width: 56,
+                                      height: 56,
+                                      decoration: BoxDecoration(
+                                        gradient: const LinearGradient(
+                                          colors: [
+                                            Color(0xFF667EEA),
+                                            Color(0xFF764BA2),
+                                          ],
+                                        ),
+                                        borderRadius: BorderRadius.circular(16),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: const Color(0xFF667EEA)
+                                                .withOpacity(0.3),
+                                            blurRadius: 12,
+                                            offset: const Offset(0, 4),
+                                          ),
+                                        ],
+                                      ),
+                                      child: const Icon(
+                                        Icons.auto_stories_rounded,
+                                        size: 28,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              )
+                            : Container(
+                                width: 56,
+                                height: 56,
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      Color(0xFF667EEA),
+                                      Color(0xFF764BA2),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(0xFF667EEA)
+                                          .withOpacity(0.3),
+                                      blurRadius: 12,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: const Icon(
+                                  Icons.auto_stories_rounded,
+                                  size: 28,
+                                  color: Colors.white,
+                                ),
+                              ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Perpustakaan',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF1E293B),
+                                  letterSpacing: -0.5,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Pilih buku yang ingin kamu baca',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[600],
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -406,56 +372,12 @@ class _ReadingMaterialScreenState extends State<ReadingMaterialScreen>
     );
   }
 
-  Widget _buildFloatingCloud(Color color, double size, double delay) {
-    if (_floatingController == null || _floatingAnimation == null) {
-      return Container(
-        width: size,
-        height: size * 0.7,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(size),
-          boxShadow: [
-            BoxShadow(
-              color: color.withOpacity(0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return AnimatedBuilder(
-      animation: _floatingController!,
-      builder: (context, child) {
-        return Transform.translate(
-          offset: Offset(0, _floatingAnimation!.value * (1 + delay * 0.3)),
-          child: Container(
-            width: size,
-            height: size * 0.7,
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(size),
-              boxShadow: [
-                BoxShadow(
-                  color: color.withOpacity(0.3),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   Widget _buildMaterialCard(
       BuildContext context, ReadingMaterial material, int index) {
     final cardColors = _getCardColors(index);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 20),
+      margin: const EdgeInsets.only(bottom: 16),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -474,17 +396,13 @@ class _ReadingMaterialScreenState extends State<ReadingMaterialScreen>
           child: Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: cardColors,
-              ),
+              color: Colors.white,
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: cardColors[0].withOpacity(0.4),
-                  blurRadius: 15,
-                  offset: const Offset(0, 8),
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 20,
+                  offset: const Offset(0, 4),
                 ),
               ],
             ),
@@ -492,42 +410,31 @@ class _ReadingMaterialScreenState extends State<ReadingMaterialScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Icon buku dengan desain menarik
+                    // Icon buku dengan desain modern
                     Container(
-                      width: 60,
-                      height: 60,
+                      width: 56,
+                      height: 56,
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(15),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: cardColors,
+                        ),
+                        borderRadius: BorderRadius.circular(14),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            blurRadius: 10,
+                            color: cardColors[0].withOpacity(0.3),
+                            blurRadius: 8,
                             offset: const Offset(0, 4),
                           ),
                         ],
                       ),
-                      child: Stack(
-                        children: [
-                          Center(
-                            child: Icon(
-                              Icons.picture_as_pdf,
-                              size: 30,
-                              color: Colors.red.shade400,
-                            ),
-                          ),
-                          // Sparkle effect
-                          Positioned(
-                            top: 5,
-                            right: 5,
-                            child: Icon(
-                              Icons.auto_awesome,
-                              size: 14,
-                              color: Colors.amber.shade600,
-                            ),
-                          ),
-                        ],
+                      child: const Icon(
+                        Icons.auto_stories_rounded,
+                        size: 28,
+                        color: Colors.white,
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -541,46 +448,48 @@ class _ReadingMaterialScreenState extends State<ReadingMaterialScreen>
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: Color(0xFF1E293B),
+                              height: 1.3,
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 8),
                           Row(
                             children: [
                               Icon(
-                                Icons.person,
+                                Icons.person_outline_rounded,
                                 size: 16,
-                                color: Colors.white.withOpacity(0.8),
+                                color: Colors.grey[600],
                               ),
-                              const SizedBox(width: 4),
+                              const SizedBox(width: 6),
                               Expanded(
                                 child: Text(
                                   material.penulis,
                                   style: TextStyle(
                                     fontSize: 14,
-                                    color: Colors.white.withOpacity(0.9),
+                                    color: Colors.grey[700],
+                                    fontWeight: FontWeight.w500,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 2),
+                          const SizedBox(height: 6),
                           Row(
                             children: [
                               Icon(
-                                Icons.date_range,
-                                size: 16,
-                                color: Colors.white.withOpacity(0.8),
+                                Icons.calendar_today_rounded,
+                                size: 14,
+                                color: Colors.grey[500],
                               ),
-                              const SizedBox(width: 4),
+                              const SizedBox(width: 6),
                               Text(
                                 material.tahun,
                                 style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.white.withOpacity(0.8),
+                                  fontSize: 13,
+                                  color: Colors.grey[600],
                                 ),
                               ),
                             ],
@@ -588,50 +497,66 @@ class _ReadingMaterialScreenState extends State<ReadingMaterialScreen>
                         ],
                       ),
                     ),
-                    // Playful arrow
+                    // Arrow icon
                     Container(
-                      width: 40,
-                      height: 40,
+                      width: 36,
+                      height: 36,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        shape: BoxShape.circle,
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Icon(
-                        Icons.play_arrow,
-                        color: Colors.white,
-                        size: 24,
+                      child: Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        size: 16,
+                        color: Colors.grey[700],
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
                 // Description
-                if (material.description.isNotEmpty)
+                if (material.description.isNotEmpty) ...[
+                  const SizedBox(height: 16),
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.grey[50],
                       borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Colors.grey[200]!,
+                        width: 1,
+                      ),
                     ),
                     child: Text(
                       material.description,
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.white.withOpacity(0.9),
-                        height: 1.4,
+                        color: Colors.grey[700],
+                        height: 1.5,
                       ),
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                const SizedBox(height: 12),
-                // Fun action button
+                ],
+                const SizedBox(height: 16),
+                // Action button
                 Container(
                   width: double.infinity,
-                  height: 45,
+                  height: 48,
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(25),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: cardColors,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: cardColors[0].withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
                   child: Material(
                     color: Colors.transparent,
@@ -647,31 +572,27 @@ class _ReadingMaterialScreenState extends State<ReadingMaterialScreen>
                           ),
                         );
                       },
-                      borderRadius: BorderRadius.circular(25),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.menu_book,
-                            color: cardColors[1],
-                            size: 20,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Baca Sekarang!',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: cardColors[1],
+                      borderRadius: BorderRadius.circular(12),
+                      child: Center(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+                            Icon(
+                              Icons.auto_stories_rounded,
+                              color: Colors.white,
+                              size: 20,
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          Icon(
-                            Icons.auto_awesome,
-                            color: Colors.amber.shade600,
-                            size: 16,
-                          ),
-                        ],
+                            SizedBox(width: 8),
+                            Text(
+                              'Baca Sekarang',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),

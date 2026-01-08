@@ -14,6 +14,7 @@ import 'package:education_game_app/screens/reading_material_screen.dart';
 import 'package:education_game_app/screens/score_screen.dart';
 import 'package:education_game_app/screens/splash_screen.dart';
 import 'package:education_game_app/screens/summary_screen.dart';
+import 'package:education_game_app/screens/assessment_sumatif_screen.dart';
 
 class RouteGenerator {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -21,7 +22,8 @@ class RouteGenerator {
     final args = settings.arguments;
 
     // Handle dynamic routes for final test
-    if (settings.name != null && RegExp(r'^/final-test/(\d+)$').hasMatch(settings.name!)) {
+    if (settings.name != null &&
+        RegExp(r'^/final-test/(\d+)$').hasMatch(settings.name!)) {
       final match = RegExp(r'^/final-test/(\d+)$').firstMatch(settings.name!);
       if (match != null) {
         final materialId = int.parse(match.group(1)!);
@@ -118,6 +120,9 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => const ReadingMaterialScreen());
       case '/profile':
         return MaterialPageRoute(builder: (_) => const ProfileScreen());
+      case '/assessment-sumatif':
+        return MaterialPageRoute(
+            builder: (_) => const AssessmentSumatifScreen());
       default:
         return _errorRoute();
     }

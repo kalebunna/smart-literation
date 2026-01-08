@@ -87,7 +87,8 @@ class _ReflectionScreenState extends State<ReflectionScreen>
 
     try {
       final apiService = ApiService();
-      final question = await apiService.getReflectionQuestion(widget.materialId);
+      final question =
+          await apiService.getReflectionQuestion(widget.materialId);
 
       setState(() {
         _reflectionQuestion = question;
@@ -457,9 +458,9 @@ class _ReflectionScreenState extends State<ReflectionScreen>
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Answer Section
           Row(
             children: [
@@ -479,9 +480,9 @@ class _ReflectionScreenState extends State<ReflectionScreen>
               ),
             ],
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           Expanded(
             child: Container(
               padding: const EdgeInsets.all(16),
@@ -489,9 +490,9 @@ class _ReflectionScreenState extends State<ReflectionScreen>
                 color: Colors.grey.shade50,
                 borderRadius: BorderRadius.circular(15),
                 border: Border.all(
-                  color: _answerFocusNode.hasFocus 
-                    ? AppColors.primary 
-                    : Colors.grey.shade200,
+                  color: _answerFocusNode.hasFocus
+                      ? AppColors.primary
+                      : Colors.grey.shade200,
                   width: 2,
                 ),
               ),
@@ -506,7 +507,8 @@ class _ReflectionScreenState extends State<ReflectionScreen>
                   height: 1.5,
                 ),
                 decoration: const InputDecoration(
-                  hintText: 'Tuliskan refleksi Anda di sini...\n\nAnda dapat menulis dalam beberapa paragraf untuk mengekspresikan pemikiran dan pembelajaran Anda secara lengkap.',
+                  hintText:
+                      'Tuliskan refleksi Anda di sini...\n\nAnda dapat menulis dalam beberapa paragraf untuk mengekspresikan pemikiran dan pembelajaran Anda secara lengkap.',
                   hintStyle: TextStyle(
                     color: Colors.grey,
                     fontSize: 14,
@@ -520,9 +522,9 @@ class _ReflectionScreenState extends State<ReflectionScreen>
               ),
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Character count
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -535,12 +537,17 @@ class _ReflectionScreenState extends State<ReflectionScreen>
                 ),
               ),
               if (_answerController.text.length < 50)
-                Text(
-                  'Minimal 50 karakter untuk refleksi yang bermakna',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.orange[700],
-                    fontStyle: FontStyle.italic,
+                Flexible(
+                  child: Text(
+                    'Minimal 50 karakter untuk refleksi yang bermakna',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.orange[700],
+                      fontStyle: FontStyle.italic,
+                    ),
+                    textAlign: TextAlign.end,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
                   ),
                 ),
             ],
@@ -552,13 +559,13 @@ class _ReflectionScreenState extends State<ReflectionScreen>
 
   Widget _buildSubmitButton() {
     final bool isAnswerValid = _answerController.text.trim().length >= 50;
-    
+
     return SizedBox(
       width: double.infinity,
       child: CustomButton(
-        text: _isSubmitting 
-          ? 'Mengirim Refleksi...' 
-          : '📝 Kirim Refleksi & Lanjut ke Rangkuman',
+        text: _isSubmitting
+            ? 'Mengirim Refleksi...'
+            : '📝 Kirim Refleksi & Lanjut ke Rangkuman',
         onPressed: isAnswerValid && !_isSubmitting ? _submitReflection : null,
         color: isAnswerValid ? AppColors.primary : Colors.grey,
         height: 60,

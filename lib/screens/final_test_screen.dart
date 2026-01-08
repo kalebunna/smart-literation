@@ -139,7 +139,16 @@ class _FinalTestScreenState extends State<FinalTestScreen>
                 Icon(Icons.warning_amber_rounded,
                     color: Colors.orange, size: 30),
                 const SizedBox(width: 10),
-                const Text('Konfirmasi Final Test'),
+                Expanded(
+                  child: Text(
+                    'Konfirmasi Final Test',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
               ],
             ),
             content: Column(
@@ -315,11 +324,20 @@ class _FinalTestScreenState extends State<FinalTestScreen>
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
-              title: const Row(
+              title: Row(
                 children: [
-                  Icon(Icons.check_circle, color: Colors.green, size: 30),
-                  SizedBox(width: 10),
-                  Text('Selesaikan Test?'),
+                  const Icon(Icons.check_circle, color: Colors.green, size: 30),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Selesaikan Test?',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ],
               ),
               content: Column(
@@ -1038,159 +1056,169 @@ class _FinalTestCelebrationScreenState extends State<FinalTestCelebrationScreen>
             ),
           ),
           child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'Selamat!',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.deepPurple,
-                    ),
-                  ),
-                  const Text(
-                    'Final Test Selesai!',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey,
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-
-                  // Trophy Animation
-                  AnimatedBuilder(
-                    animation: _trophyAnimation,
-                    builder: (context, child) {
-                      return Transform.scale(
-                        scale: _trophyAnimation.value,
-                        child: Container(
-                          padding: const EdgeInsets.all(30),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 20,
-                                offset: const Offset(0, 10),
-                              ),
-                            ],
-                          ),
-                          child: Text(
-                            _getScoreEmoji(),
-                            style: const TextStyle(fontSize: 80),
-                          ),
+            child: SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: MediaQuery.of(context).size.height -
+                      MediaQuery.of(context).padding.top -
+                      MediaQuery.of(context).padding.bottom,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        'Selamat!',
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.deepPurple,
                         ),
-                      );
-                    },
-                  ),
-
-                  const SizedBox(height: 30),
-
-                  // Score Display
-                  AnimatedBuilder(
-                    animation: _scoreAnimation,
-                    builder: (context, child) {
-                      return Transform.scale(
-                        scale: _scoreAnimation.value,
-                        child: Container(
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 20,
-                                offset: const Offset(0, 5),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            children: [
-                              Text(
-                                '${widget.score}',
-                                style: TextStyle(
-                                  fontSize: 60,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.primary,
-                                ),
-                              ),
-                              const Text(
-                                'SKOR ANDA',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                _getScoreMessage(),
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.green,
-                                ),
-                              ),
-                            ],
-                          ),
+                      ),
+                      const Text(
+                        'Final Test Selesai!',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.grey,
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                      const SizedBox(height: 30),
 
-                  const SizedBox(height: 30),
+                      // Trophy Animation
+                      AnimatedBuilder(
+                        animation: _trophyAnimation,
+                        builder: (context, child) {
+                          return Transform.scale(
+                            scale: _trophyAnimation.value,
+                            child: Container(
+                              padding: const EdgeInsets.all(30),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 10),
+                                  ),
+                                ],
+                              ),
+                              child: Text(
+                                _getScoreEmoji(),
+                                style: const TextStyle(fontSize: 80),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
 
-                  // Stats
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(15),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 2),
+                      const SizedBox(height: 30),
+
+                      // Score Display
+                      AnimatedBuilder(
+                        animation: _scoreAnimation,
+                        builder: (context, child) {
+                          return Transform.scale(
+                            scale: _scoreAnimation.value,
+                            child: Container(
+                              padding: const EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 5),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    '${widget.score}',
+                                    style: TextStyle(
+                                      fontSize: 60,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
+                                  const Text(
+                                    'SKOR ANDA',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    _getScoreMessage(),
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.green,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Stats
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(15),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        _buildStatItem(
-                            '✅', '${widget.correctAnswers}', 'Benar'),
-                        _buildStatItem(
-                            '❌',
-                            '${widget.totalQuestions - widget.correctAnswers}',
-                            'Salah'),
-                        _buildStatItem(
-                            '⏱️', _formatTime(widget.elapsedTime), 'Waktu'),
-                      ],
-                    ),
-                  ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            _buildStatItem(
+                                '✅', '${widget.correctAnswers}', 'Benar'),
+                            _buildStatItem(
+                                '❌',
+                                '${widget.totalQuestions - widget.correctAnswers}',
+                                'Salah'),
+                            _buildStatItem(
+                                '⏱️', _formatTime(widget.elapsedTime), 'Waktu'),
+                          ],
+                        ),
+                      ),
 
-                  const SizedBox(height: 40),
+                      const SizedBox(height: 24),
 
-                  // Home Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: CustomButton(
-                      text: '🏠 Kembali ke Home',
-                      onPressed: () {
-                        Navigator.of(context).pushNamedAndRemoveUntil(
-                          '/dashboard',
-                          (route) => false,
-                        );
-                      },
-                      color: AppColors.primary,
-                    ),
+                      // Home Button
+                      SizedBox(
+                        width: double.infinity,
+                        child: CustomButton(
+                          text: '🏠 Kembali ke Home',
+                          onPressed: () {
+                            Navigator.of(context).pushNamedAndRemoveUntil(
+                              '/dashboard',
+                              (route) => false,
+                            );
+                          },
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),

@@ -25,12 +25,12 @@ class _QuizCelebrationScreenState extends State<QuizCelebrationScreen>
   late AnimationController _trophyController;
   late AnimationController _textController;
   late AnimationController _buttonController;
-  
+
   late Animation<double> _confettiAnimation;
   late Animation<double> _trophyAnimation;
   late Animation<double> _textAnimation;
   late Animation<double> _buttonAnimation;
-  
+
   final AudioPlayer _audioPlayer = AudioPlayer();
   List<ConfettiParticle> _confettiParticles = [];
 
@@ -48,17 +48,17 @@ class _QuizCelebrationScreenState extends State<QuizCelebrationScreen>
       duration: const Duration(seconds: 3),
       vsync: this,
     );
-    
+
     _trophyController = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
-    
+
     _textController = AnimationController(
       duration: const Duration(milliseconds: 1000),
       vsync: this,
     );
-    
+
     _buttonController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
@@ -68,7 +68,7 @@ class _QuizCelebrationScreenState extends State<QuizCelebrationScreen>
       begin: 0.0,
       end: 1.0,
     ).animate(_confettiController);
-    
+
     _trophyAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -76,7 +76,7 @@ class _QuizCelebrationScreenState extends State<QuizCelebrationScreen>
       parent: _trophyController,
       curve: Curves.elasticOut,
     ));
-    
+
     _textAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -84,7 +84,7 @@ class _QuizCelebrationScreenState extends State<QuizCelebrationScreen>
       parent: _textController,
       curve: Curves.easeOutBack,
     ));
-    
+
     _buttonAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -128,15 +128,15 @@ class _QuizCelebrationScreenState extends State<QuizCelebrationScreen>
     Future.delayed(const Duration(milliseconds: 200), () {
       _trophyController.forward();
     });
-    
+
     Future.delayed(const Duration(milliseconds: 800), () {
       _textController.forward();
     });
-    
+
     Future.delayed(const Duration(milliseconds: 1200), () {
       _buttonController.forward();
     });
-    
+
     _confettiController.repeat();
   }
 
@@ -162,7 +162,7 @@ class _QuizCelebrationScreenState extends State<QuizCelebrationScreen>
   @override
   Widget build(BuildContext context) {
     double percentage = (widget.score / widget.totalQuestions) * 100;
-    
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -198,302 +198,325 @@ class _QuizCelebrationScreenState extends State<QuizCelebrationScreen>
                 },
               ),
             ),
-            
+
             // Main Content
             SafeArea(
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Trophy Animation
-                      AnimatedBuilder(
-                        animation: _trophyAnimation,
-                        builder: (context, child) {
-                          return Transform.scale(
-                            scale: _trophyAnimation.value,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.yellow.withValues(alpha: 0.5),
-                                    blurRadius: 30,
-                                    spreadRadius: 10,
+              child: SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: MediaQuery.of(context).size.height -
+                        MediaQuery.of(context).padding.top -
+                        MediaQuery.of(context).padding.bottom,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Trophy Animation
+                        AnimatedBuilder(
+                          animation: _trophyAnimation,
+                          builder: (context, child) {
+                            return Transform.scale(
+                              scale: _trophyAnimation.value,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color:
+                                          Colors.yellow.withValues(alpha: 0.5),
+                                      blurRadius: 30,
+                                      spreadRadius: 10,
+                                    ),
+                                  ],
+                                ),
+                                child: const Text(
+                                  '🏆',
+                                  style: TextStyle(fontSize: 120),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        // Congratulations Text
+                        AnimatedBuilder(
+                          animation: _textAnimation,
+                          builder: (context, child) {
+                            return Transform.scale(
+                              scale: _textAnimation.value,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 16,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(20),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color:
+                                          Colors.black.withValues(alpha: 0.2),
+                                      offset: const Offset(0, 8),
+                                      blurRadius: 20,
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  children: [
+                                    const Text(
+                                      '🎉 Selamat! 🎉',
+                                      style: TextStyle(
+                                        fontSize: 32,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF4CAF50),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    const Text(
+                                      'Kamu telah menyelesaikan kuis!',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        color: Color(0xFF666666),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      'Skor: ${widget.score}/${widget.totalQuestions}',
+                                      style: const TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF2196F3),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      '${percentage.toStringAsFixed(0)}%',
+                                      style: const TextStyle(
+                                        fontSize: 32,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFFE91E63),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        // Performance Message
+                        AnimatedBuilder(
+                          animation: _textAnimation,
+                          builder: (context, child) {
+                            return Transform.translate(
+                              offset:
+                                  Offset(0, 50 * (1 - _textAnimation.value)),
+                              child: Opacity(
+                                opacity: _textAnimation.value.clamp(0.0, 1.0),
+                                child: Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.9),
+                                    borderRadius: BorderRadius.circular(16),
                                   ),
-                                ],
-                              ),
-                              child: const Text(
-                                '🏆',
-                                style: TextStyle(fontSize: 120),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                      
-                      const SizedBox(height: 32),
-                      
-                      // Congratulations Text
-                      AnimatedBuilder(
-                        animation: _textAnimation,
-                        builder: (context, child) {
-                          return Transform.scale(
-                            scale: _textAnimation.value,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
-                                vertical: 16,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(20),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.2),
-                                    offset: const Offset(0, 8),
-                                    blurRadius: 20,
+                                  child: Text(
+                                    _getPerformanceMessage(percentage),
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w500,
+                                      color: Color(0xFF333333),
+                                    ),
+                                    textAlign: TextAlign.center,
                                   ),
-                                ],
+                                ),
                               ),
+                            );
+                          },
+                        ),
+
+                        const SizedBox(height: 32),
+
+                        // Action Buttons
+                        AnimatedBuilder(
+                          animation: _buttonAnimation,
+                          builder: (context, child) {
+                            return Transform.scale(
+                              scale: _buttonAnimation.value,
                               child: Column(
                                 children: [
-                                  const Text(
-                                    '🎉 Selamat! 🎉',
-                                    style: TextStyle(
-                                      fontSize: 32,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF4CAF50),
+                                  // Summary Button
+                                  Container(
+                                    width: double.infinity,
+                                    margin: const EdgeInsets.only(bottom: 16),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(25),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black
+                                              .withValues(alpha: 0.3),
+                                          offset: const Offset(0, 6),
+                                          blurRadius: 15,
+                                        ),
+                                      ],
+                                    ),
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                MaterialSummaryScreen(
+                                              materialId: widget.materialId,
+                                              quizScore: widget.score,
+                                              totalQuizQuestions:
+                                                  widget.totalQuestions,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            const Color(0xFF9B59B6),
+                                        foregroundColor: Colors.white,
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 20,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(25),
+                                        ),
+                                        elevation: 0,
+                                      ),
+                                      child: const Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(Icons.library_books, size: 24),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            'Lihat Rangkuman',
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                  const SizedBox(height: 12),
-                                  const Text(
-                                    'Kamu telah menyelesaikan kuis!',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      color: Color(0xFF666666),
+
+                                  // Back to Material Button
+                                  Container(
+                                    width: double.infinity,
+                                    margin: const EdgeInsets.only(bottom: 16),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(25),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.3),
+                                          offset: const Offset(0, 6),
+                                          blurRadius: 15,
+                                        ),
+                                      ],
+                                    ),
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.of(context).popUntil(
+                                          (route) => route.isFirst,
+                                        );
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            const Color(0xFF4CAF50),
+                                        foregroundColor: Colors.white,
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 20,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(25),
+                                        ),
+                                        elevation: 0,
+                                      ),
+                                      child: const Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(Icons.home, size: 24),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            'Kembali ke Materi',
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    'Skor: ${widget.score}/${widget.totalQuestions}',
-                                    style: const TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF2196F3),
+
+                                  // Try Again Button
+                                  Container(
+                                    width: double.infinity,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(25),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.3),
+                                          offset: const Offset(0, 6),
+                                          blurRadius: 15,
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    '${percentage.toStringAsFixed(0)}%',
-                                    style: const TextStyle(
-                                      fontSize: 32,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFFE91E63),
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                        Navigator.of(context).pop();
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            const Color(0xFF2196F3),
+                                        foregroundColor: Colors.white,
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 20,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(25),
+                                        ),
+                                        elevation: 0,
+                                      ),
+                                      child: const Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(Icons.refresh, size: 24),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            'Coba Lagi',
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
-                          );
-                        },
-                      ),
-                      
-                      const SizedBox(height: 40),
-                      
-                      // Performance Message
-                      AnimatedBuilder(
-                        animation: _textAnimation,
-                        builder: (context, child) {
-                          return Transform.translate(
-                            offset: Offset(0, 50 * (1 - _textAnimation.value)),
-                            child: Opacity(
-                              opacity: _textAnimation.value.clamp(0.0, 1.0),
-                              child: Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.9),
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: Text(
-                                  _getPerformanceMessage(percentage),
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w500,
-                                    color: Color(0xFF333333),
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                      
-                      const SizedBox(height: 48),
-                      
-                      // Action Buttons
-                      AnimatedBuilder(
-                        animation: _buttonAnimation,
-                        builder: (context, child) {
-                          return Transform.scale(
-                            scale: _buttonAnimation.value,
-                            child: Column(
-                              children: [
-                                // Summary Button
-                                Container(
-                                  width: double.infinity,
-                                  margin: const EdgeInsets.only(bottom: 16),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(25),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.3),
-                                        offset: const Offset(0, 6),
-                                        blurRadius: 15,
-                                      ),
-                                    ],
-                                  ),
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                          builder: (context) => MaterialSummaryScreen(
-                                            materialId: widget.materialId,
-                                            quizScore: widget.score,
-                                            totalQuizQuestions: widget.totalQuestions,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF9B59B6),
-                                      foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 20,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(25),
-                                      ),
-                                      elevation: 0,
-                                    ),
-                                    child: const Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Icon(Icons.library_books, size: 24),
-                                        SizedBox(width: 8),
-                                        Text(
-                                          'Lihat Rangkuman',
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                
-                                // Back to Material Button
-                                Container(
-                                  width: double.infinity,
-                                  margin: const EdgeInsets.only(bottom: 16),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(25),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.3),
-                                        offset: const Offset(0, 6),
-                                        blurRadius: 15,
-                                      ),
-                                    ],
-                                  ),
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.of(context).popUntil(
-                                        (route) => route.isFirst,
-                                      );
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF4CAF50),
-                                      foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 20,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(25),
-                                      ),
-                                      elevation: 0,
-                                    ),
-                                    child: const Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Icon(Icons.home, size: 24),
-                                        SizedBox(width: 8),
-                                        Text(
-                                          'Kembali ke Materi',
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                
-                                // Try Again Button
-                                Container(
-                                  width: double.infinity,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(25),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.3),
-                                        offset: const Offset(0, 6),
-                                        blurRadius: 15,
-                                      ),
-                                    ],
-                                  ),
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                      Navigator.of(context).pop();
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF2196F3),
-                                      foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 20,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(25),
-                                      ),
-                                      elevation: 0,
-                                    ),
-                                    child: const Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Icon(Icons.refresh, size: 24),
-                                        SizedBox(width: 8),
-                                        Text(
-                                          'Coba Lagi',
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ],
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -550,25 +573,27 @@ class ConfettiPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     // Ensure we have valid dimensions
     if (size.width <= 0 || size.height <= 0) return;
-    
+
     for (var particle in particles) {
       particle.y += particle.fallSpeed;
       particle.rotation += particle.rotationSpeed;
-      
+
       if (particle.y > 1.1) {
         particle.y = -0.1;
         particle.x = math.Random().nextDouble();
       }
 
       final paint = Paint()..color = particle.color;
-      
+
       // Calculate actual positions
       final x = particle.x * size.width;
       final y = particle.y * size.height;
-      
+
       // Only draw if within bounds
-      if (x >= -particle.size && x <= size.width + particle.size &&
-          y >= -particle.size && y <= size.height + particle.size) {
+      if (x >= -particle.size &&
+          x <= size.width + particle.size &&
+          y >= -particle.size &&
+          y <= size.height + particle.size) {
         canvas.save();
         canvas.translate(x, y);
         canvas.rotate(particle.rotation);

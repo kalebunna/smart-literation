@@ -8,8 +8,8 @@ import 'package:education_game_app/screens/chapter_list_screen.dart';
 import 'package:education_game_app/screens/profile_screen.dart';
 import 'package:education_game_app/screens/reading_material_screen.dart';
 import 'package:education_game_app/screens/login_screen.dart';
-import 'package:liquid_progress_indicator_v2/liquid_progress_indicator.dart';
-import 'package:animations/animations.dart';
+import 'package:education_game_app/screens/assessment_sumatif_screen.dart';
+import 'package:education_game_app/screens/assessment_result_review_screen.dart';
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -24,6 +24,8 @@ class _DashboardScreenState extends State<DashboardScreen>
   int _currentIndex = 0;
   DashboardData? _dashboardData;
   bool _isLoading = true;
+  bool?
+      _hasCompletedAssessment; // null = belum dicek, true = sudah, false = belum
   late AnimationController _fadeController;
   late AnimationController _slideController;
   late AnimationController _liquidController;
@@ -94,12 +96,15 @@ class _DashboardScreenState extends State<DashboardScreen>
       final apiService = ApiService();
       final data = await apiService.getDashboardData();
 
+      // Cek apakah user sudah mengerjakan assessment sumatif (tidak perlu await, bisa berjalan parallel)
+      _checkAssessmentStatus();
+
       setState(() {
         _dashboardData = data;
         _isLoading = false;
       });
 
-      // Start animations
+      // Start animations setelah data dimuat
       _fadeController.forward();
       _slideController.forward();
       _liquidController.forward();
@@ -108,14 +113,27 @@ class _DashboardScreenState extends State<DashboardScreen>
         _isLoading = false;
       });
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Waduh, ada masalah nih! Coba lagi yuk! 😅'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      // Start animations even on error untuk menghindari blank screen
+      _fadeController.forward();
+      _slideController.forward();
+      _liquidController.forward();
+    }
+  }
+
+  Future<void> _checkAssessmentStatus() async {
+    try {
+      final apiService = ApiService();
+      final resultsResponse = await apiService.getAssessmentSumatifResults();
+
+      setState(() {
+        // Jika berhasil mendapatkan hasil (meskipun skor 0), berarti sudah mengerjakan
+        _hasCompletedAssessment =
+            resultsResponse.success && resultsResponse.data != null;
+      });
+    } catch (e) {
+      setState(() {
+        _hasCompletedAssessment = false;
+      });
     }
   }
 
@@ -569,15 +587,42 @@ class _DashboardScreenState extends State<DashboardScreen>
       );
     }
 
-    return FadeTransition(
-      opacity: _fadeAnimation,
-      child: SlideTransition(
-        position: _slideAnimation,
-        child: DashboardHomeContent(
-          dashboardData: _dashboardData!,
-          onLogout: _logout,
-        ),
-      ),
+    // Pastikan animasi sudah di-start
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted &&
+          !_fadeController.isAnimating &&
+          _fadeAnimation.value == 0.0) {
+        _fadeController.forward();
+        _slideController.forward();
+        _liquidController.forward();
+      }
+    });
+
+    // Gunakan AnimatedBuilder untuk memastikan widget rebuild saat animasi berubah
+    return AnimatedBuilder(
+      animation: _fadeAnimation,
+      builder: (context, child) {
+        // Jika animasi belum dimulai dan opacity masih 0, langsung tampilkan tanpa animasi
+        if (_fadeAnimation.value == 0.0 && !_fadeController.isAnimating) {
+          return DashboardHomeContent(
+            dashboardData: _dashboardData!,
+            onLogout: _logout,
+            hasCompletedAssessment: _hasCompletedAssessment,
+          );
+        }
+
+        return Opacity(
+          opacity: _fadeAnimation.value > 0 ? _fadeAnimation.value : 1.0,
+          child: Transform.translate(
+            offset: _slideAnimation.value,
+            child: DashboardHomeContent(
+              dashboardData: _dashboardData!,
+              onLogout: _logout,
+              hasCompletedAssessment: _hasCompletedAssessment,
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -585,18 +630,20 @@ class _DashboardScreenState extends State<DashboardScreen>
 class DashboardHomeContent extends StatelessWidget {
   final DashboardData dashboardData;
   final VoidCallback onLogout;
+  final bool? hasCompletedAssessment;
 
   const DashboardHomeContent({
     Key? key,
     required this.dashboardData,
     required this.onLogout,
+    this.hasCompletedAssessment,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -606,14 +653,11 @@ class DashboardHomeContent extends StatelessWidget {
             const SizedBox(height: 20),
             _buildStatsGrid(),
             const SizedBox(height: 24),
-            _buildWeeklyGoalCard(),
+            _buildAssessmentSumatifCard(context, hasCompletedAssessment),
             const SizedBox(height: 24),
             _buildSectionHeader('Progres Kamu'),
             const SizedBox(height: 16),
             _buildRecentResults(),
-            const SizedBox(height: 24),
-            _buildCurrentLearningCard(),
-            const SizedBox(height: 24),
           ],
         ),
       ),
@@ -785,16 +829,6 @@ class DashboardHomeContent extends StatelessWidget {
             AppColors.secondary,
           ),
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildStatCard(
-            'Nilai Kamu',
-            '${dashboardData.userOverview.totalScoreAverage.toStringAsFixed(1)}%',
-            dashboardData.userOverview.totalScoreAverage / 100,
-            Icons.trending_up_rounded,
-            AppColors.success,
-          ),
-        ),
       ],
     );
   }
@@ -857,22 +891,25 @@ class DashboardHomeContent extends StatelessWidget {
     );
   }
 
-  Widget _buildWeeklyGoalCard() {
-    final materialsCompleted =
-        dashboardData.recentActivity.materialsCompletedThisWeek;
-    final weeklyGoal = 5; // Default weekly goal
-    final progress = materialsCompleted / weeklyGoal;
-
+  Widget _buildAssessmentSumatifCard(
+      BuildContext context, bool? hasCompletedAssessment) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        gradient: LinearGradient(
+          colors: [
+            AppColors.primary,
+            AppColors.primary.withValues(alpha: 0.8),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: AppColors.primary.withValues(alpha: 0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -882,55 +919,153 @@ class DashboardHomeContent extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.info.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
-                  Icons.flag_rounded,
-                  color: AppColors.info,
-                  size: 20,
+                  Icons.assignment_turned_in_rounded,
+                  color: Colors.white,
+                  size: 28,
                 ),
               ),
-              const SizedBox(width: 12),
-              const Text(
-                'Target Minggu Ini! 🎯',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-              const Spacer(),
-              Text(
-                '$materialsCompleted/$weeklyGoal',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                  fontWeight: FontWeight.w500,
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Assessment Sumatif',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Ujian akhir setelah semua bab selesai',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.9),
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
           const SizedBox(height: 16),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: LinearProgressIndicator(
-              value: progress.clamp(0.0, 1.0),
-              backgroundColor: Colors.grey[200],
-              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.info),
-              minHeight: 8,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            progress >= 1.0
-                ? 'Yeay! Kamu sudah selesai target minggu ini! Hebat banget! 🎉'
-                : 'Ayok semangat! Tinggal ${weeklyGoal - materialsCompleted} materi lagi nih! Kamu pasti bisa! 💪',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () async {
+                try {
+                  final apiService = ApiService();
+
+                  // Cek apakah user sudah mengerjakan assessment sumatif
+                  final resultsResponse =
+                      await apiService.getAssessmentSumatifResults();
+
+                  // Jika berhasil mendapatkan hasil (meskipun skor 0), berarti sudah mengerjakan
+                  if (resultsResponse.success && resultsResponse.data != null) {
+                    // User sudah mengerjakan assessment, langsung ke review
+                    if (context.mounted) {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              const AssessmentResultReviewScreen(),
+                        ),
+                      );
+                    }
+                    return;
+                  }
+
+                  // Jika error dan bukan 404, berarti ada masalah lain
+                  if (resultsResponse.error != null &&
+                      !resultsResponse.error!
+                          .toLowerCase()
+                          .contains('belum mengerjakan')) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                              resultsResponse.error ?? 'Terjadi kesalahan'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                    return;
+                  }
+
+                  // Jika belum mengerjakan, cek apakah sudah selesai semua bab
+                  final response = await apiService.getAssessmentSumatif();
+
+                  if (response.success) {
+                    // Navigate to assessment sumatif screen
+                    if (context.mounted) {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const AssessmentSumatifScreen(),
+                        ),
+                      );
+                    }
+                  } else {
+                    // Show error dialog
+                    if (context.mounted) {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            content: Text(
+                              response.error ??
+                                  'Anda belum menyelesaikan semua bab. Silakan selesaikan semua bab terlebih dahulu untuk mengakses assessment sumatif.',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                child: const Text('Mengerti'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    }
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Error: ${e.toString()}'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: AppColors.primary,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              child: Text(
+                hasCompletedAssessment == true
+                    ? 'Lihat Hasil Assessment'
+                    : 'Mulai Assessment Sumatif',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ),
         ],
@@ -985,350 +1120,97 @@ class DashboardHomeContent extends StatelessWidget {
       );
     }
 
-    return Column(
-      children: [
-        // Last completed material
-        if (lastCompletedMaterial != null)
+    // Only show last completed material, remove scores section
+    if (lastCompletedMaterial == null) {
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Center(
+          child: Text(
+            'Belum ada hasil nih! Yuk mulai belajar! 🚀',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
           Container(
-            margin: const EdgeInsets.only(bottom: 12),
-            padding: const EdgeInsets.all(16),
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.08),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              color: AppColors.success.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Row(
+            child: const Center(
+              child: Icon(
+                Icons.check_circle,
+                color: AppColors.success,
+                size: 20,
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: AppColors.success.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.check_circle,
-                      color: AppColors.success,
-                      size: 20,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        lastCompletedMaterial,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Materi terakhir yang kamu selesaikan',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
                 Text(
-                  'Selesai! 🎉',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.success,
+                  lastCompletedMaterial,
+                  style: const TextStyle(
                     fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Materi terakhir yang kamu selesaikan',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
                   ),
                 ),
               ],
             ),
           ),
-        // Recent scores display
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
+          Text(
+            'Selesai! 🎉',
+            style: TextStyle(
+              fontSize: 12,
+              color: AppColors.success,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(
-                    Icons.trending_up,
-                    color: AppColors.primary,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  const Text(
-                    'Nilai ',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    'Rata-rata kamu: ${dashboardData.recentActivity.averageRecentScore.toInt()}% 📊',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: recentScores.take(5).map((score) {
-                  return Expanded(
-                    child: Container(
-                      margin: const EdgeInsets.only(right: 4),
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      decoration: BoxDecoration(
-                        color: _getScoreColor(score.toDouble())
-                            .withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Center(
-                        child: Text(
-                          '$score%',
-                          style: TextStyle(
-                            color: _getScoreColor(score.toDouble()),
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ],
-          ),
-        ),
-      ],
+        ],
+      ),
     );
-  }
-
-  Widget _buildCurrentLearningCard() {
-    final currentLearning = dashboardData.currentLearning;
-    final activeChapter = currentLearning.activeChapter;
-    final nextMaterial = currentLearning.nextMaterial;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader('Belajar Yuk!'),
-        const SizedBox(height: 16),
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (activeChapter != null) ...[
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(
-                        Icons.book_rounded,
-                        color: AppColors.primary,
-                        size: 20,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            activeChapter.name,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            activeChapter.description,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[600],
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Text(
-                      'Sejauh ini:',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const Spacer(),
-                    Text(
-                      '${activeChapter.materialsCompleted} dari ${activeChapter.materialsTotal} materi selesai!',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: LinearProgressIndicator(
-                    value: activeChapter.progress.clamp(0.0, 1.0),
-                    backgroundColor: Colors.grey[200],
-                    valueColor:
-                        const AlwaysStoppedAnimation<Color>(AppColors.primary),
-                    minHeight: 8,
-                  ),
-                ),
-              ] else ...[
-                Center(
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.school_outlined,
-                        size: 48,
-                        color: Colors.grey[400],
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Belum ada bab yang kamu pilih nih! 📖',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-              if (nextMaterial != null) ...[
-                const SizedBox(height: 20),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: nextMaterial.isUnlocked
-                        ? AppColors.secondary.withValues(alpha: 0.1)
-                        : Colors.grey.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: nextMaterial.isUnlocked
-                          ? AppColors.secondary.withValues(alpha: 0.3)
-                          : Colors.grey.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        nextMaterial.isUnlocked
-                            ? Icons.play_circle_outline
-                            : Icons.lock_outline,
-                        color: nextMaterial.isUnlocked
-                            ? AppColors.secondary
-                            : Colors.grey,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Selanjutnya kita belajar: ${nextMaterial.name}',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: nextMaterial.isUnlocked
-                                    ? Colors.black87
-                                    : Colors.grey,
-                              ),
-                            ),
-                            Text(
-                              nextMaterial.type.toUpperCase(),
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: nextMaterial.isUnlocked
-                                    ? AppColors.secondary
-                                    : Colors.grey,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (nextMaterial.isUnlocked)
-                        Icon(
-                          Icons.arrow_forward_ios,
-                          color: AppColors.secondary,
-                          size: 16,
-                        ),
-                    ],
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Color _getScoreColor(double percentage) {
-    if (percentage >= 80) return AppColors.success;
-    if (percentage >= 60) return AppColors.secondary;
-    return AppColors.error;
   }
 }

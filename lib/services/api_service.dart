@@ -6,15 +6,15 @@ import 'package:education_game_app/models/chapter_model.dart';
 
 import 'package:education_game_app/models/material_model.dart' as model;
 import 'package:education_game_app/models/question_model.dart';
-import 'package:education_game_app/models/user_model.dart';
 import 'package:education_game_app/models/summary_model.dart';
 import 'package:education_game_app/models/reflection_model.dart';
 import 'package:education_game_app/models/dashboard_model.dart';
+import 'package:education_game_app/models/assessment_result_model.dart';
 import 'package:education_game_app/utils/api_response_handler.dart';
 
 class ApiService {
   final String baseUrl =
-      'http://127.0.0.1:8000/api'; // Ganti dengan URL API sebenarnya
+      'http://192.168.1.23:8000/api'; // Ganti dengan URL API sebenarnya
 
   // Headers umum untuk request
   Future<Map<String, String>> _getHeaders({String? token}) async {
@@ -355,7 +355,7 @@ class ApiService {
       );
 
       final apiResponse = _handleResponse<Map<String, dynamic>>(response);
-      
+
       if (apiResponse.success && apiResponse.data != null) {
         final data = apiResponse.data!;
         return DashboardData.fromJson(data['data'] ?? data);
@@ -368,7 +368,8 @@ class ApiService {
   }
 
   // Endpoint: POST /dashboard with body
-  Future<ApiResponse<Map<String, dynamic>>> dashboard(Map<String, dynamic> body) async {
+  Future<ApiResponse<Map<String, dynamic>>> dashboard(
+      Map<String, dynamic> body) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/dashboard'),
@@ -384,13 +385,15 @@ class ApiService {
       );
     }
   }
-  
+
   // Alternative: GET /dashboard with query parameters
-  Future<ApiResponse<Map<String, dynamic>>> dashboardWithQuery(Map<String, dynamic> params) async {
+  Future<ApiResponse<Map<String, dynamic>>> dashboardWithQuery(
+      Map<String, dynamic> params) async {
     try {
-      final uri = Uri.parse('$baseUrl/dashboard').replace(queryParameters: 
-        params.map((key, value) => MapEntry(key, value.toString())));
-      
+      final uri = Uri.parse('$baseUrl/dashboard').replace(
+          queryParameters:
+              params.map((key, value) => MapEntry(key, value.toString())));
+
       final response = await http.get(
         uri,
         headers: await _getHeaders(),
@@ -414,13 +417,13 @@ class ApiService {
       );
 
       final apiResponse = _handleResponse<Map<String, dynamic>>(response);
-      
+
       if (apiResponse.success) {
         // Clear stored token
         final prefs = await SharedPreferences.getInstance();
         await prefs.remove('token');
         await prefs.remove('user_data');
-        
+
         return apiResponse.data ?? {'message': 'Logout successful'};
       } else {
         throw Exception(apiResponse.error ?? 'Failed to logout');
@@ -439,7 +442,7 @@ class ApiService {
       );
 
       final apiResponse = _handleResponse<Map<String, dynamic>>(response);
-      
+
       if (apiResponse.success && apiResponse.data != null) {
         final data = apiResponse.data!;
         if (data['data'] != null) {
@@ -448,7 +451,8 @@ class ApiService {
           return null; // No reflection question available
         }
       } else {
-        throw Exception(apiResponse.error ?? 'Failed to load reflection question');
+        throw Exception(
+            apiResponse.error ?? 'Failed to load reflection question');
       }
     } catch (e) {
       throw Exception('Failed to load reflection question: $e');
@@ -456,7 +460,8 @@ class ApiService {
   }
 
   // Endpoint: POST /reflection
-  Future<Map<String, dynamic>> submitReflection(int soalId, String jawaban) async {
+  Future<Map<String, dynamic>> submitReflection(
+      int soalId, String jawaban) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/reflection'),
@@ -468,7 +473,7 @@ class ApiService {
       );
 
       final apiResponse = _handleResponse<Map<String, dynamic>>(response);
-      
+
       if (apiResponse.success && apiResponse.data != null) {
         return apiResponse.data!;
       } else {
@@ -476,6 +481,113 @@ class ApiService {
       }
     } catch (e) {
       throw Exception('Failed to submit reflection: $e');
+    }
+  }
+
+  // Endpoint: GET /assessment-sumatif
+  Future<ApiResponse<Map<String, dynamic>>> getAssessmentSumatif() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/assessment-sumatif'),
+        headers: await _getHeaders(),
+      );
+
+      final responseData = json.decode(response.body);
+
+      // Handle 403 error (belum selesai semua bab)
+      if (response.statusCode == 403) {
+        return ApiResponse<Map<String, dynamic>>.error(
+          responseData['message'] ?? 'Anda belum menyelesaikan semua bab',
+        );
+      }
+
+      final apiResponse = _handleResponse<Map<String, dynamic>>(response);
+
+      if (apiResponse.success && apiResponse.data != null) {
+        final data = apiResponse.data!;
+        final List<dynamic> questionsData = data['data'] ?? [];
+        final questions =
+            questionsData.map((json) => QuizQuestion.fromJson(json)).toList();
+
+        return ApiResponse<Map<String, dynamic>>.success({
+          'questions': questions,
+          'data': responseData['data'],
+        });
+      } else {
+        return ApiResponse<Map<String, dynamic>>.error(
+          apiResponse.error ?? 'Failed to load assessment sumatif',
+        );
+      }
+    } catch (e) {
+      return ApiResponse<Map<String, dynamic>>.error(
+        'Failed to load assessment sumatif: $e',
+      );
+    }
+  }
+
+  // Endpoint: POST /assessment-sumatif/submit
+  Future<ApiResponse<Map<String, dynamic>>> submitAssessmentSumatif(
+      List<Map<String, dynamic>> jawaban) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/assessment-sumatif/submit'),
+        headers: await _getHeaders(),
+        body: jsonEncode({
+          'jawaban': jawaban,
+        }),
+      );
+
+      final apiResponse = _handleResponse<Map<String, dynamic>>(response);
+
+      if (apiResponse.success && apiResponse.data != null) {
+        return ApiResponse<Map<String, dynamic>>.success(apiResponse.data!);
+      } else {
+        return ApiResponse<Map<String, dynamic>>.error(
+          apiResponse.error ?? 'Failed to submit assessment sumatif',
+        );
+      }
+    } catch (e) {
+      return ApiResponse<Map<String, dynamic>>.error(
+        'Failed to submit assessment sumatif: $e',
+      );
+    }
+  }
+
+  // Endpoint: GET /assessment-sumatif/results
+  Future<ApiResponse<AssessmentResult>> getAssessmentSumatifResults() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/assessment-sumatif/results'),
+        headers: await _getHeaders(),
+      );
+
+      final responseData = json.decode(response.body);
+
+      // Handle 404 error (belum mengerjakan assessment)
+      if (response.statusCode == 404) {
+        return ApiResponse<AssessmentResult>.error(
+          responseData['message'] ??
+              'Anda belum mengerjakan assessment sumatif',
+        );
+      }
+
+      final apiResponse = _handleResponse<Map<String, dynamic>>(response);
+
+      if (apiResponse.success && apiResponse.data != null) {
+        final data = apiResponse.data!;
+        // The API returns {status: true, data: {...}}, so we need to access data['data']
+        final resultData = data['data'] ?? data;
+        final assessmentResult = AssessmentResult.fromJson(resultData);
+        return ApiResponse<AssessmentResult>.success(assessmentResult);
+      } else {
+        return ApiResponse<AssessmentResult>.error(
+          apiResponse.error ?? 'Failed to load assessment results',
+        );
+      }
+    } catch (e) {
+      return ApiResponse<AssessmentResult>.error(
+        'Failed to load assessment results: $e',
+      );
     }
   }
 

@@ -8,6 +8,8 @@ import 'package:education_game_app/providers/chapter_provider.dart';
 import 'package:education_game_app/providers/material_provider.dart';
 import 'package:education_game_app/screens/material_overview_screen.dart';
 import 'package:education_game_app/screens/score_screen.dart';
+import 'package:education_game_app/screens/assessment_result_review_screen.dart';
+import 'package:education_game_app/screens/material_content_screen.dart';
 
 class MaterialListScreen extends StatefulWidget {
   final int chapterId;
@@ -212,35 +214,84 @@ class _MaterialListScreenState extends State<MaterialListScreen>
           ),
         ),
         actions: [
-          Container(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF10B981),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.thumb_up, size: 18),
-                  const SizedBox(width: 8),
-                  const Text(
-                    'Keren!',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+          _buildDialogAction(
+            context: context,
+            label: 'Tampilkan Materi',
+            icon: Icons.menu_book,
+            color: const Color(0xFF6366F1),
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => MaterialContentScreen(
+                    materialId: material.id,
                   ),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 8),
+          _buildDialogAction(
+            context: context,
+            label: 'Review Final Test',
+            icon: Icons.rate_review,
+            color: Colors.orange.shade700,
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const AssessmentResultReviewScreen(),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 8),
+          _buildDialogAction(
+            context: context,
+            label: 'Keren!',
+            icon: Icons.thumb_up,
+            color: const Color(0xFF10B981),
+            onPressed: () => Navigator.of(context).pop(),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDialogAction({
+    required BuildContext context,
+    required String label,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          elevation: 0,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 18),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

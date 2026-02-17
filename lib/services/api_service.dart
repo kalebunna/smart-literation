@@ -14,7 +14,7 @@ import 'package:education_game_app/utils/api_response_handler.dart';
 
 class ApiService {
   final String baseUrl =
-      'http://192.168.1.23:8000/api'; // Ganti dengan URL API sebenarnya
+      'http://127.0.0.1:8000/api'; // Ganti dengan URL API sebenarnya
 
   // Headers umum untuk request
   Future<Map<String, String>> _getHeaders({String? token}) async {
@@ -367,47 +367,6 @@ class ApiService {
     }
   }
 
-  // Endpoint: POST /dashboard with body
-  Future<ApiResponse<Map<String, dynamic>>> dashboard(
-      Map<String, dynamic> body) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/dashboard'),
-        headers: await _getHeaders(),
-        body: jsonEncode(body),
-      );
-
-      return _handleResponse<Map<String, dynamic>>(response);
-    } catch (e) {
-      return ApiResponse<Map<String, dynamic>>(
-        success: false,
-        error: 'Failed to load dashboard data: $e',
-      );
-    }
-  }
-
-  // Alternative: GET /dashboard with query parameters
-  Future<ApiResponse<Map<String, dynamic>>> dashboardWithQuery(
-      Map<String, dynamic> params) async {
-    try {
-      final uri = Uri.parse('$baseUrl/dashboard').replace(
-          queryParameters:
-              params.map((key, value) => MapEntry(key, value.toString())));
-
-      final response = await http.get(
-        uri,
-        headers: await _getHeaders(),
-      );
-
-      return _handleResponse<Map<String, dynamic>>(response);
-    } catch (e) {
-      return ApiResponse<Map<String, dynamic>>(
-        success: false,
-        error: 'Failed to load dashboard data: $e',
-      );
-    }
-  }
-
   // Endpoint: POST /logout
   Future<Map<String, dynamic>> logout() async {
     try {
@@ -587,6 +546,101 @@ class ApiService {
     } catch (e) {
       return ApiResponse<AssessmentResult>.error(
         'Failed to load assessment results: $e',
+      );
+    }
+  }
+
+  // Pretest Methods
+
+  // Endpoint: GET /pretest
+  Future<ApiResponse<List<QuizQuestion>>> getPretestQuestions() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/pretest'),
+        headers: await _getHeaders(),
+      );
+
+      final apiResponse = _handleResponse<Map<String, dynamic>>(response);
+
+      if (apiResponse.success && apiResponse.data != null) {
+        final data = apiResponse.data!;
+        final List<dynamic> questionsData = data['data'] ?? [];
+        final questions =
+            questionsData.map((json) => QuizQuestion.fromJson(json)).toList();
+
+        return ApiResponse<List<QuizQuestion>>.success(questions);
+      } else {
+        return ApiResponse<List<QuizQuestion>>.error(
+          apiResponse.error ?? 'Failed to load pretest questions',
+        );
+      }
+    } catch (e) {
+      return ApiResponse<List<QuizQuestion>>.error(
+        'Failed to load pretest questions: $e',
+      );
+    }
+  }
+
+  // Endpoint: POST /pretest/submit
+  Future<ApiResponse<Map<String, dynamic>>> submitPretestAnswers(
+      List<Map<String, dynamic>> jawaban) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/pretest/submit'),
+        headers: await _getHeaders(),
+        body: jsonEncode({
+          'jawaban': jawaban,
+        }),
+      );
+
+      final apiResponse = _handleResponse<Map<String, dynamic>>(response);
+
+      if (apiResponse.success && apiResponse.data != null) {
+        return ApiResponse<Map<String, dynamic>>.success(apiResponse.data!['data']);
+      } else {
+        return ApiResponse<Map<String, dynamic>>.error(
+          apiResponse.error ?? 'Failed to submit pretest answers',
+        );
+      }
+    } catch (e) {
+      return ApiResponse<Map<String, dynamic>>.error(
+        'Failed to submit pretest answers: $e',
+      );
+    }
+  }
+
+  // Endpoint: GET /pretest/results
+  Future<ApiResponse<AssessmentResult>> getPretestResults() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/pretest/results'),
+        headers: await _getHeaders(),
+      );
+
+      final responseData = json.decode(response.body);
+
+      // Handle 404 error
+      if (response.statusCode == 404) {
+        return ApiResponse<AssessmentResult>.error(
+          responseData['message'] ?? 'Anda belum mengerjakan pretest',
+        );
+      }
+
+      final apiResponse = _handleResponse<Map<String, dynamic>>(response);
+
+      if (apiResponse.success && apiResponse.data != null) {
+        final data = apiResponse.data!;
+        final resultData = data['data'] ?? data;
+        final assessmentResult = AssessmentResult.fromJson(resultData);
+        return ApiResponse<AssessmentResult>.success(assessmentResult);
+      } else {
+        return ApiResponse<AssessmentResult>.error(
+          apiResponse.error ?? 'Failed to load pretest results',
+        );
+      }
+    } catch (e) {
+      return ApiResponse<AssessmentResult>.error(
+        'Failed to load pretest results: $e',
       );
     }
   }

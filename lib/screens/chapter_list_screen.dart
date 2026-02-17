@@ -23,7 +23,9 @@ class _ChapterListScreenState extends State<ChapterListScreen>
   void initState() {
     super.initState();
     _setupAnimations();
-    _loadChapters();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadChapters();
+    });
   }
 
   void _setupAnimations() {

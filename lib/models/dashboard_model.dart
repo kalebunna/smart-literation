@@ -35,6 +35,8 @@ class UserOverview {
   final DateTime? lastActivity;
   final int totalMaterialsCompleted;
   final int totalMaterialsAvailable;
+  final bool hasCompletedPretest;
+  final double pretestScore;
 
   UserOverview({
     required this.name,
@@ -47,6 +49,8 @@ class UserOverview {
     this.lastActivity,
     required this.totalMaterialsCompleted,
     required this.totalMaterialsAvailable,
+    required this.hasCompletedPretest,
+    required this.pretestScore,
   });
 
   factory UserOverview.fromJson(Map<String, dynamic> json) {
@@ -65,6 +69,8 @@ class UserOverview {
           : null,
       totalMaterialsCompleted: json['total_materials_completed'] ?? 0,
       totalMaterialsAvailable: json['total_materials_available'] ?? 0,
+      hasCompletedPretest: json['has_completed_pretest'] ?? false,
+      pretestScore: (json['pretest_score'] ?? 0).toDouble(),
     );
   }
 
@@ -166,12 +172,14 @@ class NextMaterial {
 
 class RecentActivity {
   final String? lastCompletedMaterial;
+  final List<String> completedMaterials;
   final List<int> recentScores;
   final AssessmentsThisWeek assessmentsThisWeek;
   final int materialsCompletedThisWeek;
 
   RecentActivity({
     this.lastCompletedMaterial,
+    required this.completedMaterials,
     required this.recentScores,
     required this.assessmentsThisWeek,
     required this.materialsCompletedThisWeek,
@@ -180,10 +188,10 @@ class RecentActivity {
   factory RecentActivity.fromJson(Map<String, dynamic> json) {
     return RecentActivity(
       lastCompletedMaterial: json['last_completed_material'],
-      recentScores: (json['recent_scores'] as List<dynamic>? ?? [])
-          .map((score) => (score as num).toInt())
-          .toList(),
-      assessmentsThisWeek: AssessmentsThisWeek.fromJson(json['assessments_this_week'] ?? {}),
+      completedMaterials: List<String>.from(json['completed_materials'] ?? []),
+      recentScores: List<int>.from(json['recent_scores'] ?? []),
+      assessmentsThisWeek:
+          AssessmentsThisWeek.fromJson(json['assessments_this_week'] ?? {}),
       materialsCompletedThisWeek: json['materials_completed_this_week'] ?? 0,
     );
   }
@@ -304,15 +312,9 @@ class Recommendations {
 
   factory Recommendations.fromJson(Map<String, dynamic> json) {
     return Recommendations(
-      nextActions: (json['next_actions'] as List<dynamic>? ?? [])
-          .map((item) => item.toString())
-          .toList(),
-      improvementAreas: (json['improvement_areas'] as List<dynamic>? ?? [])
-          .map((item) => item.toString())
-          .toList(),
-      strengths: (json['strengths'] as List<dynamic>? ?? [])
-          .map((item) => item.toString())
-          .toList(),
+      nextActions: List<String>.from(json['next_actions'] ?? []),
+      improvementAreas: List<String>.from(json['improvement_areas'] ?? []),
+      strengths: List<String>.from(json['strengths'] ?? []),
     );
   }
 }

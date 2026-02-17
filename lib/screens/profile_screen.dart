@@ -25,7 +25,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    _fetchDashboardData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchDashboardData();
+    });
   }
 
   @override
@@ -44,108 +46,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _fetchDashboardData() async {
     try {
       print('🔍 Fetching dashboard data...');
+      final dashboardData = await _apiService.getDashboardData();
+      print('📊 Dashboard data loaded successfully');
 
-      // Try POST first
-      var response = await _apiService.dashboard({"sections": "overview"});
+      // Map to expected structure
+      final mappedData = {
+        'current_chapter': {
+          'id': dashboardData.userOverview.currentChapter?.id ?? 0,
+          'name': dashboardData.userOverview.currentChapter?.name ?? 'Belum ada',
+        },
+        'overall_progress_percentage':
+            dashboardData.userOverview.overallProgressPercentage,
+        'total_materials_completed':
+            dashboardData.userOverview.totalMaterialsCompleted,
+        'total_materials_available':
+            dashboardData.userOverview.totalMaterialsAvailable,
+      };
 
-      print('📡 POST Response: ${response.success}');
-      print('📊 POST Data: ${response.data}');
-      print('❌ POST Error: ${response.error}');
+      print('✅ Mapped Data: $mappedData');
 
-      // If POST fails, try GET with query parameters
-      if (!response.success) {
-        print('🔄 POST failed, trying GET...');
-        response =
-            await _apiService.dashboardWithQuery({"sections": "overview"});
-
-        print('📡 GET Response: ${response.success}');
-        print('📊 GET Data: ${response.data}');
-        print('❌ GET Error: ${response.error}');
-      }
-
-      // If still fails, try the original getDashboardData method
-      if (!response.success) {
-        print('🔄 Both failed, trying original method...');
-        try {
-          final dashboardData = await _apiService.getDashboardData();
-          print('📊 Original method data loaded successfully');
-
-          // Create mock data structure from DashboardData
-          final mockData = {
-            'current_chapter': {
-              'id': dashboardData.userOverview.currentChapter?.id ?? 0,
-              'name': dashboardData.userOverview.currentChapter?.name ??
-                  'Belum ada',
-            },
-            'overall_progress_percentage':
-                dashboardData.userOverview.overallProgressPercentage,
-            'total_materials_completed':
-                dashboardData.userOverview.totalMaterialsCompleted,
-            'total_materials_available':
-                dashboardData.userOverview.totalMaterialsAvailable,
-          };
-
-          setState(() {
-            _dashboardData = mockData;
-            _isLoading = false;
-          });
-          return;
-        } catch (e) {
-          print('❌ Original method also failed: $e');
-        }
-      }
-
-      if (response.success && response.data != null) {
-        // Extract the correct data structure
-        final rawData = response.data!['data'] ?? response.data;
-        final userOverview = rawData['user_overview'];
-        print('🎯 Parsed Data: $rawData');
-        print('👤 User Overview: $userOverview');
-
-        // Map to expected structure
-        final mappedData = {
-          'current_chapter': userOverview['current_chapter'],
-          'overall_progress_percentage':
-              userOverview['overall_progress_percentage'],
-          'total_materials_completed':
-              userOverview['total_materials_completed'],
-          'total_materials_available':
-              userOverview['total_materials_available'],
-        };
-
-        print('✅ Mapped Data: $mappedData');
-
+      if (mounted) {
         setState(() {
           _dashboardData = mappedData;
           _isLoading = false;
         });
-      } else {
-        print('❌ All API calls failed: ${response.error}');
+      }
+    } catch (e) {
+      print('💥 Exception occurred: $e');
+      if (mounted) {
         setState(() {
           _isLoading = false;
         });
 
-        // Show error to user
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                  'Gagal memuat data dashboard: ${response.error ?? "Tidak dapat terhubung ke server"}'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      print('💥 Exception occurred: $e');
-      setState(() {
-        _isLoading = false;
-      });
-
-      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text('Gagal memuat data dashboard: $e'),
             backgroundColor: Colors.red,
           ),
         );

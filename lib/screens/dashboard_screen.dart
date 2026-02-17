@@ -10,6 +10,7 @@ import 'package:education_game_app/screens/reading_material_screen.dart';
 import 'package:education_game_app/screens/login_screen.dart';
 import 'package:education_game_app/screens/assessment_sumatif_screen.dart';
 import 'package:education_game_app/screens/assessment_result_review_screen.dart';
+import 'package:education_game_app/screens/pretest_screen.dart';
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -26,6 +27,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   bool _isLoading = true;
   bool?
       _hasCompletedAssessment; // null = belum dicek, true = sudah, false = belum
+  bool _pretestModalShown = false;
   late AnimationController _fadeController;
   late AnimationController _slideController;
   late AnimationController _liquidController;
@@ -108,6 +110,14 @@ class _DashboardScreenState extends State<DashboardScreen>
       _fadeController.forward();
       _slideController.forward();
       _liquidController.forward();
+
+      // Show pretest modal if not completed
+      if (data.userOverview.hasCompletedPretest == false && !_pretestModalShown) {
+        setState(() {
+          _pretestModalShown = true;
+        });
+        _showPretestModal();
+      }
     } catch (e) {
       setState(() {
         _isLoading = false;
@@ -118,6 +128,70 @@ class _DashboardScreenState extends State<DashboardScreen>
       _slideController.forward();
       _liquidController.forward();
     }
+  }
+
+  void _showPretestModal() {
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: Row(
+              children: [
+                const Icon(Icons.celebration, color: Colors.orange, size: 28),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: Text(
+                    'Halo Sahabat Pintar! 👋',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                Text(
+                  'Sebelum mulai belajar, yuk kita cek dulu sejauh mana pengetahuan kamu di Pretest!',
+                  style: TextStyle(fontSize: 16),
+                ),
+                SizedBox(height: 12),
+                Text(
+                  'Tenang saja, skornya tidak akan mempengaruhi nilai akhir kok. Semangat! 🚀',
+                  style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic, color: Colors.grey),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Nanti Saja'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const PretestScreen()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text('Mulai Pretest!', style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          );
+        },
+      );
+    });
   }
 
   Future<void> _checkAssessmentStatus() async {
@@ -649,10 +723,14 @@ class DashboardHomeContent extends StatelessWidget {
           children: [
             _buildHeader(context),
             const SizedBox(height: 24),
-            _buildStreakCard(),
+            _buildPretestScoreCard(),
             const SizedBox(height: 20),
             _buildStatsGrid(),
             const SizedBox(height: 24),
+            if (!dashboardData.userOverview.hasCompletedPretest) ...[
+              _buildPretestCard(context),
+              const SizedBox(height: 24),
+            ],
             _buildAssessmentSumatifCard(context, hasCompletedAssessment),
             const SizedBox(height: 24),
             _buildSectionHeader('Progres Kamu'),
@@ -660,6 +738,102 @@ class DashboardHomeContent extends StatelessWidget {
             _buildRecentResults(),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildPretestCard(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.orange.shade400,
+            Colors.orange.shade600,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.orange.withValues(alpha: 0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.assignment_rounded,
+                  color: Colors.white,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: 16),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Ujian Pretest',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Cek pengetahuan awalanmu yuk!',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const PretestScreen()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.orange.shade700,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              child: const Text(
+                'Mulai Pretest Sekarang',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -742,15 +916,15 @@ class DashboardHomeContent extends StatelessWidget {
     );
   }
 
-  Widget _buildStreakCard() {
+  Widget _buildPretestScoreCard() {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.primary,
-            AppColors.primary.withValues(alpha: 0.8),
+            Colors.indigo.shade600,
+            Colors.indigo.shade800,
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -758,7 +932,7 @@ class DashboardHomeContent extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.3),
+            color: Colors.indigo.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -773,7 +947,7 @@ class DashboardHomeContent extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(
-              Icons.local_fire_department_rounded,
+              Icons.stars_rounded,
               color: Colors.white,
               size: 28,
             ),
@@ -784,16 +958,20 @@ class DashboardHomeContent extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Kamu sudah belajar ${dashboardData.userOverview.streakDays} Hari',
+                  dashboardData.userOverview.hasCompletedPretest
+                      ? 'Skor Pretest Kamu: ${dashboardData.userOverview.pretestScore.toInt()}'
+                      : 'Belum Ada Skor Pretest',
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 15,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Wah keren! Terus semangat belajar ya!',
+                  dashboardData.userOverview.hasCompletedPretest
+                      ? 'Hebat! Terus tingkatkan kemampuanmu ya!'
+                      : 'Yuk kerjakan pretest untuk cek kemampuan awal!',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.9),
                     fontSize: 14,
@@ -1090,11 +1268,9 @@ class DashboardHomeContent extends StatelessWidget {
   }
 
   Widget _buildRecentResults() {
-    final recentScores = dashboardData.recentActivity.recentScores;
-    final lastCompletedMaterial =
-        dashboardData.recentActivity.lastCompletedMaterial;
+    final completedMaterials = dashboardData.recentActivity.completedMaterials;
 
-    if (recentScores.isEmpty) {
+    if (completedMaterials.isEmpty) {
       return Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
@@ -1120,97 +1296,79 @@ class DashboardHomeContent extends StatelessWidget {
       );
     }
 
-    // Only show last completed material, remove scores section
-    if (lastCompletedMaterial == null) {
-      return Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Center(
-          child: Text(
-            'Belum ada hasil nih! Yuk mulai belajar! 🚀',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
-            ),
-          ),
-        ),
-      );
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: AppColors.success.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Center(
-              child: Icon(
-                Icons.check_circle,
-                color: AppColors.success,
-                size: 20,
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: completedMaterials.length,
+      separatorBuilder: (context, index) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        final materialName = completedMaterials[index];
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
               ),
-            ),
+            ],
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  lastCompletedMaterial,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                    color: Colors.black87,
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: AppColors.success.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.check_circle,
+                    color: AppColors.success,
+                    size: 20,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'Materi terakhir yang kamu selesaikan',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      materialName,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Materi telah diselesaikan',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              Text(
+                'Selesai! 🎉',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppColors.success,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
           ),
-          Text(
-            'Selesai! 🎉',
-            style: TextStyle(
-              fontSize: 12,
-              color: AppColors.success,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

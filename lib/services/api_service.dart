@@ -14,7 +14,7 @@ import 'package:education_game_app/utils/api_response_handler.dart';
 
 class ApiService {
   final String baseUrl =
-      'http://127.0.0.1:8000/api'; // Ganti dengan URL API sebenarnya
+      'http://210.79.191.199:9010/api'; // Ganti dengan URL API sebenarnya
 
   // Headers umum untuk request
   Future<Map<String, String>> _getHeaders({String? token}) async {

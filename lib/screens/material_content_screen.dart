@@ -13,6 +13,7 @@ import 'package:chewie/chewie.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
+import 'package:education_game_app/services/api_service.dart';
 
 class MaterialContentScreen extends StatefulWidget {
   final int materialId;
@@ -121,10 +122,14 @@ class _MaterialContentScreenState extends State<MaterialContentScreen>
 
   Future<void> _downloadPDF(String url) async {
     try {
-      final baseUrl = 'http://127.0.0.1:8000/storage/';
+      final baseUrl = '${ApiService.storageBaseUrl}/';
       final fullUrl = baseUrl + url;
 
+      debugPrint('Attempting to download PDF from: $fullUrl');
+
       final response = await http.get(Uri.parse(fullUrl));
+
+      debugPrint('Download response status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final bytes = response.bodyBytes;
@@ -133,15 +138,19 @@ class _MaterialContentScreenState extends State<MaterialContentScreen>
             File('${dir.path}/${DateTime.now().millisecondsSinceEpoch}.pdf');
 
         await file.writeAsBytes(bytes);
+        debugPrint('PDF saved to: ${file.path}');
 
         setState(() {
           _pdfPath = file.path;
           _isLoading = false;
         });
       } else {
+        debugPrint('Failed to download PDF. Status code: ${response.statusCode}');
+        debugPrint('Response body: ${response.body}');
         throw Exception('Failed to download PDF: ${response.statusCode}');
       }
     } catch (e) {
+      debugPrint('Error downloading PDF: $e');
       throw Exception('Failed to download PDF: $e');
     }
   }

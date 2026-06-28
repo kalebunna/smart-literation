@@ -684,10 +684,14 @@ class _FunPDFViewScreenState extends State<FunPDFViewScreen>
 
     try {
       // Pada implementasi nyata, download PDF dari URL di server
-      final baseUrl = 'http://127.0.0.1:8000/storage/';
+      final baseUrl = '${ApiService.storageBaseUrl}/';
       final fullUrl = baseUrl + widget.fileUrl;
 
+      debugPrint('ReadingMaterial: Downloading PDF from $fullUrl');
+
       final response = await http.get(Uri.parse(fullUrl));
+
+      debugPrint('ReadingMaterial: Download status ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final bytes = response.bodyBytes;
@@ -696,15 +700,18 @@ class _FunPDFViewScreenState extends State<FunPDFViewScreen>
             File('${dir.path}/${DateTime.now().millisecondsSinceEpoch}.pdf');
 
         await file.writeAsBytes(bytes);
+        debugPrint('ReadingMaterial: Saved to ${file.path}');
 
         setState(() {
           localPath = file.path;
           _isLoading = false;
         });
       } else {
+        debugPrint('ReadingMaterial: Failed to download. Body: ${response.body}');
         throw Exception('Failed to download PDF: ${response.statusCode}');
       }
     } catch (e) {
+      debugPrint('ReadingMaterial: Error $e');
       setState(() {
         _isLoading = false;
       });

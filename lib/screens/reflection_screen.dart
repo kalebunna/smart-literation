@@ -131,23 +131,110 @@ class _ReflectionScreenState extends State<ReflectionScreen>
 
     try {
       final apiService = ApiService();
-      await apiService.submitReflection(
+      final result = await apiService.submitReflection(
         _reflectionQuestion!.idSoal,
         _answerController.text.trim(),
       );
 
-      // Navigate to final test celebration screen
+      final feedback = result['data']?['feedback'] ?? result['feedback'] ?? 'Refleksi berhasil dikirim!';
+
+      // Show AI feedback dialog
       if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => FinalTestCelebrationScreen(
-              materialId: widget.materialId,
-              score: widget.finalTestScore,
-              correctAnswers: widget.correctAnswers,
-              totalQuestions: widget.totalQuestions,
-              elapsedTime: widget.elapsedTime,
-            ),
-          ),
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              elevation: 10,
+              backgroundColor: Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.psychology,
+                        color: AppColors.primary,
+                        size: 40,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      '💭 Umpan Balik Guru AI',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.deepPurple,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.purple.shade50,
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Text(
+                        feedback,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          height: 1.4,
+                          color: Colors.black87,
+                          fontStyle: FontStyle.italic,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        onPressed: () {
+                          // Close dialog and proceed to final test celebration screen
+                          Navigator.of(context).pop(); // pop dialog
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                              builder: (context) => FinalTestCelebrationScreen(
+                                materialId: widget.materialId,
+                                score: widget.finalTestScore,
+                                correctAnswers: widget.correctAnswers,
+                                totalQuestions: widget.totalQuestions,
+                                elapsedTime: widget.elapsedTime,
+                              ),
+                            ),
+                          );
+                        },
+                        child: const Text(
+                          'Lanjut ke Rangkuman',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         );
       }
     } catch (e) {

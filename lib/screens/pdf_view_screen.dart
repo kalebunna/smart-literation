@@ -41,8 +41,10 @@ class _PDFViewScreenState extends State<PDFViewScreen> {
     });
 
     try {
+      debugPrint('PDFViewScreen: Downloading from ${widget.url}');
       // Pada implementasi nyata, download PDF dari URL
       final response = await http.get(Uri.parse(widget.url));
+      debugPrint('PDFViewScreen: Response status ${response.statusCode}');
 
       // Simpan ke penyimpanan lokal
       final bytes = response.bodyBytes;
@@ -51,12 +53,14 @@ class _PDFViewScreenState extends State<PDFViewScreen> {
           File('${dir.path}/${DateTime.now().millisecondsSinceEpoch}.pdf');
 
       await file.writeAsBytes(bytes);
+      debugPrint('PDFViewScreen: Saved to ${file.path}');
 
       setState(() {
         localPath = file.path;
         _isLoading = false;
       });
     } catch (e) {
+      debugPrint('PDFViewScreen: Error $e');
       setState(() {
         _isLoading = false;
       });

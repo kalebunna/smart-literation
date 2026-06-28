@@ -13,8 +13,8 @@ import 'package:education_game_app/models/assessment_result_model.dart';
 import 'package:education_game_app/utils/api_response_handler.dart';
 
 class ApiService {
-  final String baseUrl =
-      'http://210.79.191.199:9010/api'; // Ganti dengan URL API sebenarnya
+  static const String baseUrl = 'http://192.168.100.84:8000/api';
+  static const String storageBaseUrl = 'http://192.168.100.84/storage';
 
   // Headers umum untuk request
   Future<Map<String, String>> _getHeaders({String? token}) async {
@@ -162,7 +162,7 @@ class ApiService {
     }
   }
 
-// Endpoint: POST /greading-assesment
+  // Endpoint: POST /greading-assesment
   Future<Map<String, dynamic>> submitGreedingAssessment(
       int soalId, String jawabanSiswa) async {
     try {
@@ -179,9 +179,51 @@ class ApiService {
 
       if (apiResponse.success && apiResponse.data != null) {
         final data = apiResponse.data!;
+
+        // Handle raw Gemini response structure
+        // The backend puts the Gemini response in 'data' or 'message'
+        var geminiData = data['data'] ?? data['message'];
+
+        String feedback = '';
+        int nilai = 0;
+
+        try {
+          // Check if we have the raw Gemini structure
+          if (geminiData != null &&
+              geminiData is Map<String, dynamic> &&
+              geminiData.containsKey('candidates') &&
+              geminiData['candidates'] is List &&
+              (geminiData['candidates'] as List).isNotEmpty) {
+            final candidate = geminiData['candidates'][0];
+            if (candidate['content'] != null &&
+                candidate['content']['parts'] != null &&
+                (candidate['content']['parts'] as List).isNotEmpty) {
+              feedback = candidate['content']['parts'][0]['text'] ?? '';
+
+              // Extract score using regex: "nilai pertanyaanmu adalah [angka]"
+              final RegExp scoreRegex = RegExp(
+                  r'nilai pertanyaanmu adalah (\d+)',
+                  caseSensitive: false);
+              final match = scoreRegex.firstMatch(feedback);
+              if (match != null && match.groupCount >= 1) {
+                nilai = int.tryParse(match.group(1)!) ?? 0;
+              }
+            }
+          } else {
+            // Fallback: check if it's the old structure or flattened
+            // Sometimes parsed JSON might behave differently
+            final fallbackData = data['data'] ?? data;
+            feedback = fallbackData['feedback'] ?? '';
+            nilai = fallbackData['nilai'] ?? 0;
+          }
+        } catch (e) {
+          print('Error parsing Gemini response: $e');
+          feedback = 'Gagal memproses respon AI. Silakan coba lagi.';
+        }
+
         return {
-          'feedback': data['data']['feedback'] ?? '',
-          'nilai': data['data']['nilai'] ?? 0,
+          'feedback': feedback,
+          'nilai': nilai,
         };
       } else {
         throw Exception(apiResponse.error ?? 'Failed to submit question');
@@ -596,7 +638,8 @@ class ApiService {
       final apiResponse = _handleResponse<Map<String, dynamic>>(response);
 
       if (apiResponse.success && apiResponse.data != null) {
-        return ApiResponse<Map<String, dynamic>>.success(apiResponse.data!['data']);
+        return ApiResponse<Map<String, dynamic>>.success(
+            apiResponse.data!['data']);
       } else {
         return ApiResponse<Map<String, dynamic>>.error(
           apiResponse.error ?? 'Failed to submit pretest answers',

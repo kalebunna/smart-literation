@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.5
+  rename: ^3.1.0
   http: ^0.13.5 # Untuk API requests
   provider: ^6.0.5 # Untuk state management (opsional)
   shared_preferences: ^2.1.0 # Untuk menyimpan data lokal
@@ -26,6 +27,7 @@ dependencies:
   liquid_progress_indicator_v2: ^0.5.0
   animations: ^2.0.8
   stylish_bottom_bar: ^1.0.0
+  url_launcher: ^6.2.5
 
 dev_dependencies:
   flutter_test:

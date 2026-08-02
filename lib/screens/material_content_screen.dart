@@ -1,4 +1,5 @@
 // lib/screens/material_content_screen.dart
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:education_game_app/constants/app_colors.dart';
@@ -14,6 +15,7 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:education_game_app/services/api_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MaterialContentScreen extends StatefulWidget {
   final int materialId;
@@ -120,6 +122,9 @@ class _MaterialContentScreenState extends State<MaterialContentScreen>
     }
   }
 
+  // Menyimpan URL asli agar bisa dibuka ulang di web
+  String? _webPdfUrl;
+
   Future<void> _downloadPDF(String url) async {
     try {
       final baseUrl = '${ApiService.storageBaseUrl}/';
@@ -127,6 +132,20 @@ class _MaterialContentScreenState extends State<MaterialContentScreen>
 
       debugPrint('Attempting to download PDF from: $fullUrl');
 
+      // ── Flutter Web: buka PDF langsung di tab baru (bypass CORS) ────────────
+      if (kIsWeb) {
+        final uri = Uri.parse(fullUrl);
+        _webPdfUrl = fullUrl;
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+        } else {
+          throw Exception('Tidak bisa membuka URL: $fullUrl');
+        }
+        if (mounted) setState(() => _isLoading = false);
+        return;
+      }
+
+      // ── Mobile (Android / iOS): download lalu tampilkan PDFView ─────────────
       final response = await http.get(Uri.parse(fullUrl));
 
       debugPrint('Download response status: ${response.statusCode}');
@@ -140,10 +159,12 @@ class _MaterialContentScreenState extends State<MaterialContentScreen>
         await file.writeAsBytes(bytes);
         debugPrint('PDF saved to: ${file.path}');
 
-        setState(() {
-          _pdfPath = file.path;
-          _isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            _pdfPath = file.path;
+            _isLoading = false;
+          });
+        }
       } else {
         debugPrint('Failed to download PDF. Status code: ${response.statusCode}');
         debugPrint('Response body: ${response.body}');
@@ -444,6 +465,82 @@ class _MaterialContentScreenState extends State<MaterialContentScreen>
   }
 
   Widget _buildPDFViewer() {
+    // ── Flutter Web: tampilkan tombol buka PDF ───────────────────────────────
+    if (kIsWeb) {
+      return Container(
+        color: Colors.grey.shade100,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 90,
+                height: 90,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                  ),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF6366F1).withOpacity(0.4),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.open_in_browser_rounded,
+                  size: 44,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'PDF dibuka di tab baru 🎉',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF6366F1),
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Silakan lihat di tab browser kamu!',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF94A3B8),
+                ),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  if (_webPdfUrl != null) {
+                    final uri = Uri.parse(_webPdfUrl!);
+                    if (await canLaunchUrl(uri)) {
+                      await launchUrl(uri, mode: LaunchMode.externalApplication);
+                    }
+                  }
+                },
+                icon: const Icon(Icons.open_in_new_rounded),
+                label: const Text('Buka Lagi'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF6366F1),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 28, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // ── Mobile: tampilkan PDFView ────────────────────────────────────────────
     if (_pdfPath == null) {
       return Container(
         color: Colors.grey.shade100,

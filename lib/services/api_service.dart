@@ -13,8 +13,10 @@ import 'package:education_game_app/models/assessment_result_model.dart';
 import 'package:education_game_app/utils/api_response_handler.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.100.84:8000/api';
-  static const String storageBaseUrl = 'http://192.168.100.84/storage';
+  static const String baseUrl =
+      'https://admin-smart-literation.fiks.web.id/api';
+  static const String storageBaseUrl =
+      'https://admin-smart-literation.fiks.web.id/storage';
 
   // Headers umum untuk request
   Future<Map<String, String>> _getHeaders({String? token}) async {

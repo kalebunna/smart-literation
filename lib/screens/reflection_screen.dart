@@ -549,15 +549,15 @@ class _ReflectionScreenState extends State<ReflectionScreen>
           const SizedBox(height: 24),
 
           // Answer Section
-          Row(
+          const Row(
             children: [
               Icon(
                 Icons.edit_note,
                 color: AppColors.primary,
                 size: 24,
               ),
-              const SizedBox(width: 8),
-              const Text(
+              SizedBox(width: 8),
+              Text(
                 'Jawaban Anda:',
                 style: TextStyle(
                   fontSize: 16,

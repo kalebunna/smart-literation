@@ -28,17 +28,17 @@ class QuizOption extends StatelessWidget {
     IconData? trailingIcon;
 
     if (isCorrect) {
-      backgroundColor = AppColors.success.withOpacity(0.1);
+      backgroundColor = AppColors.success.withValues(alpha: 0.1);
       borderColor = AppColors.success;
       textColor = AppColors.success;
       trailingIcon = Icons.check_circle;
     } else if (isWrong) {
-      backgroundColor = AppColors.error.withOpacity(0.1);
+      backgroundColor = AppColors.error.withValues(alpha: 0.1);
       borderColor = AppColors.error;
       textColor = AppColors.error;
       trailingIcon = Icons.cancel;
     } else if (isSelected) {
-      backgroundColor = AppColors.primary.withOpacity(0.1);
+      backgroundColor = AppColors.primary.withValues(alpha: 0.1);
       borderColor = AppColors.primary;
       textColor = AppColors.primary;
       trailingIcon = null;

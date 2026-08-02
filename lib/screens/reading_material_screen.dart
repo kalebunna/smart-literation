@@ -1,4 +1,5 @@
 import 'package:education_game_app/models/reading_material_model.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:education_game_app/services/api_service.dart';
@@ -6,6 +7,7 @@ import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 
 class ReadingMaterialScreen extends StatefulWidget {
   const ReadingMaterialScreen({Key? key}) : super(key: key);
@@ -678,17 +680,53 @@ class _FunPDFViewScreenState extends State<FunPDFViewScreen>
   }
 
   Future<void> _downloadFile() async {
+    final baseUrl = '${ApiService.storageBaseUrl}/';
+    final fullUrl = baseUrl + widget.fileUrl;
+
+    debugPrint('ReadingMaterial: Downloading PDF from $fullUrl');
+
+    // ── Flutter Web: buka PDF langsung di tab baru (bypass CORS) ──────────────
+    if (kIsWeb) {
+      final uri = Uri.parse(fullUrl);
+      try {
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+        } else {
+          throw Exception('Tidak bisa membuka URL: $fullUrl');
+        }
+      } catch (e) {
+        debugPrint('ReadingMaterial: Error opening URL $e');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.white),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text('Gagal membuka PDF: ${e.toString()}')),
+                ],
+              ),
+              backgroundColor: Colors.red.shade400,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15)),
+            ),
+          );
+        }
+      }
+      // Pada web kita tidak download lokal, tampilkan info saja
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+      return;
+    }
+
+    // ── Mobile (Android / iOS): download lalu tampilkan dengan PDFView ─────────
     setState(() {
       _isLoading = true;
     });
 
     try {
-      // Pada implementasi nyata, download PDF dari URL di server
-      final baseUrl = '${ApiService.storageBaseUrl}/';
-      final fullUrl = baseUrl + widget.fileUrl;
-
-      debugPrint('ReadingMaterial: Downloading PDF from $fullUrl');
-
       final response = await http.get(Uri.parse(fullUrl));
 
       debugPrint('ReadingMaterial: Download status ${response.statusCode}');
@@ -702,36 +740,41 @@ class _FunPDFViewScreenState extends State<FunPDFViewScreen>
         await file.writeAsBytes(bytes);
         debugPrint('ReadingMaterial: Saved to ${file.path}');
 
-        setState(() {
-          localPath = file.path;
-          _isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            localPath = file.path;
+            _isLoading = false;
+          });
+        }
       } else {
-        debugPrint('ReadingMaterial: Failed to download. Body: ${response.body}');
+        debugPrint(
+            'ReadingMaterial: Failed to download. Body: ${response.body}');
         throw Exception('Failed to download PDF: ${response.statusCode}');
       }
     } catch (e) {
       debugPrint('ReadingMaterial: Error $e');
-      setState(() {
-        _isLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              Icon(Icons.error_outline, color: Colors.white),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text('Error loading PDF: ${e.toString()}'),
-              ),
-            ],
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.white),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text('Error loading PDF: \${e.toString()}'),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.red.shade400,
+            behavior: SnackBarBehavior.floating,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
           ),
-          backgroundColor: Colors.red.shade400,
-          behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        ),
-      );
+        );
+      }
     }
   }
 
@@ -988,8 +1031,78 @@ class _FunPDFViewScreenState extends State<FunPDFViewScreen>
                               ],
                             ),
                           )
-                        : localPath == null
+                        : kIsWeb
+                            // ── Web: PDF sudah dibuka di tab baru, tampilkan konfirmasi ──
                             ? Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      width: 90,
+                                      height: 90,
+                                      decoration: BoxDecoration(
+                                        gradient: const LinearGradient(
+                                          colors: [
+                                            Color(0xFF667eea),
+                                            Color(0xFF764ba2),
+                                          ],
+                                        ),
+                                        shape: BoxShape.circle,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: const Color(0xFF667eea)
+                                                .withOpacity(0.4),
+                                            blurRadius: 20,
+                                            offset: const Offset(0, 8),
+                                          ),
+                                        ],
+                                      ),
+                                      child: const Icon(
+                                        Icons.open_in_browser_rounded,
+                                        size: 44,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 24),
+                                    const Text(
+                                      'PDF dibuka di tab baru 🎉',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF667eea),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    const Text(
+                                      'Silakan lihat di tab browser kamu!',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Color(0xFF94A3B8),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 24),
+                                    ElevatedButton.icon(
+                                      onPressed: _downloadFile,
+                                      icon: const Icon(
+                                          Icons.open_in_new_rounded),
+                                      label: const Text('Buka Lagi'),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            const Color(0xFF667eea),
+                                        foregroundColor: Colors.white,
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 28, vertical: 14),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : localPath == null
+                                ? Center(
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [

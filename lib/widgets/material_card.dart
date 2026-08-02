@@ -22,7 +22,7 @@ class MaterialCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -81,17 +81,17 @@ class MaterialCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       if (material.isCompleted)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8),
+                        const Padding(
+                          padding: EdgeInsets.only(top: 8),
                           child: Row(
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.check_circle,
                                 color: AppColors.success,
                                 size: 16,
                               ),
-                              const SizedBox(width: 4),
-                              const Text(
+                              SizedBox(width: 4),
+                              Text(
                                 'Selesai',
                                 style: TextStyle(
                                   fontSize: 14,
@@ -133,12 +133,12 @@ class MaterialCard extends StatelessWidget {
       return Colors.grey.shade300;
     }
     if (material.isCompleted) {
-      return AppColors.success.withOpacity(0.1);
+      return AppColors.success.withValues(alpha: 0.1);
     }
     if (material.type == model.MaterialType.PDF) {
-      return Colors.red.withOpacity(0.1);
+      return Colors.red.withValues(alpha: 0.1);
     }
-    return Colors.blue.withOpacity(0.1); // Video
+    return Colors.blue.withValues(alpha: 0.1); // Video
   }
 
   IconData _getIcon() {
